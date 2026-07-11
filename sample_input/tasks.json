@@ -1,0 +1,5 @@
+[
+  {"task_id": "1", "prompt": "What is 12 + 7? Answer with the number only.", "category": "math_reasoning"},
+  {"task_id": "2", "prompt": "Classify the sentiment of this review as positive, negative, or neutral. Respond with exactly one word.\n\nReview: \"Oh great, another update that deletes my settings. Just what I needed.\"", "category": "sentiment"},
+  {"task_id": "3", "prompt": "Write a Python function levenshtein(a, b) that returns the Levenshtein edit distance between strings a and b. Return the complete function in a ```python code block.", "category": "code_generation"}
+]

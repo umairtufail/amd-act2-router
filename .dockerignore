@@ -1,0 +1,13 @@
+.git/
+.venv/
+venv/
+__pycache__/
+*.pyc
+.env
+.env.*
+data/*.jsonl
+demo/
+docs/
+tests/
+eval/results.json
+*.md

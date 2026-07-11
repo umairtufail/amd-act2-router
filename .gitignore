@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Environments
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+
+# Secrets — never commit keys
+*.key
+*.pem
+
+# Model checkpoints (large binaries; re-trainable from labeled data)
+router/checkpoints/
+*.pt
+*.ckpt
+*.safetensors
+
+# Datasets are intentionally NOT ignored: tasks_raw.jsonl and
+# labeled_multitier.jsonl are small and syncing them via git makes
+# training on the AMD pod trivial. Uncomment to ignore if they grow large.
+# data/*.jsonl
+
+# Notebooks / IDE / OS
+.ipynb_checkpoints/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Eval / demo artifacts
+eval/results.json
+.streamlit/secrets.toml

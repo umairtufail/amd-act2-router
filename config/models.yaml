@@ -1,0 +1,18 @@
+# Model tier configuration.
+# Actual model IDs live in env vars (id_env) so they can be swapped for the
+# hackathon's ALLOWED_MODELS list without touching code.
+fireworks_base_url: "https://api.fireworks.ai/inference/v1"
+
+model_tiers:
+  - name: tier0
+    id_env: MODEL_TIER0
+    description: "Cheapest allowed model"
+  - name: tier1
+    id_env: MODEL_TIER1
+    description: "Mid-low tier"
+  - name: tier2
+    id_env: MODEL_TIER2
+    description: "Mid-high tier"
+  - name: tier3
+    id_env: MODEL_TIER3
+    description: "Strongest / panic model"
