@@ -6,6 +6,8 @@ Every Fireworks call in this project goes through chat() so that:
 - token usage is always captured for evaluation.
 """
 
+from __future__ import annotations
+
 import logging
 import os
 import time
@@ -24,6 +26,19 @@ RETRYABLE_STATUS = {429, 500, 502, 503, 504}
 
 class FireworksError(RuntimeError):
     """Raised when a call fails after all retries."""
+
+
+def _backoff_seconds(attempt: int, status_code: int | None, resp) -> float:
+    """Longer waits for 429 rate limits; respect Retry-After when present."""
+    if status_code == 429 and resp is not None:
+        retry_after = resp.headers.get("Retry-After")
+        if retry_after:
+            try:
+                return min(float(retry_after), 120.0)
+            except ValueError:
+                pass
+        return min(15 * attempt, 60)  # 15s, 30s, 45s
+    return float(2 ** attempt)  # 2s, 4s for other transient errors
 
 
 def _api_key() -> str:
@@ -57,31 +72,39 @@ def chat(
     }
 
     last_error = None
+    last_status = None
+    resp = None
     for attempt in range(1, MAX_RETRIES + 1):
         try:
             resp = requests.post(url, json=payload, headers=headers, timeout=REQUEST_TIMEOUT_S)
             if resp.status_code in RETRYABLE_STATUS:
+                last_status = resp.status_code
                 last_error = f"HTTP {resp.status_code}: {resp.text[:200]}"
                 logger.warning("Fireworks transient error (attempt %d/%d): %s",
                                attempt, MAX_RETRIES, last_error)
             elif resp.status_code != 200:
-                # Non-retryable client error (bad model ID, auth, etc.) — fail fast.
                 raise FireworksError(f"HTTP {resp.status_code}: {resp.text[:500]}")
             else:
                 data = resp.json()
                 usage = data.get("usage", {})
+                msg = data["choices"][0]["message"]
+                text = msg.get("content") or msg.get("reasoning_content") or ""
                 return {
-                    "text": data["choices"][0]["message"]["content"] or "",
+                    "text": text,
                     "total_tokens": usage.get("total_tokens", 0),
                     "prompt_tokens": usage.get("prompt_tokens", 0),
                     "completion_tokens": usage.get("completion_tokens", 0),
                 }
         except (requests.Timeout, requests.ConnectionError) as exc:
+            last_status = None
+            resp = None
             last_error = f"{type(exc).__name__}: {exc}"
             logger.warning("Fireworks network error (attempt %d/%d): %s",
                            attempt, MAX_RETRIES, last_error)
         if attempt < MAX_RETRIES:
-            time.sleep(2 ** attempt)  # 2s, 4s backoff
+            wait = _backoff_seconds(attempt, last_status, resp)
+            logger.info("Retrying in %.0fs...", wait)
+            time.sleep(wait)
 
     raise FireworksError(f"Fireworks call failed after {MAX_RETRIES} attempts: {last_error}")
 

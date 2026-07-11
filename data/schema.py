@@ -30,6 +30,5 @@ class LabeledExample(TaskExample):
     """A task after multi-tier labeling."""
 
     tier_label: str  # cheapest tier that passed, or "none" if all failed
-    # Per-tier outcome: {"tier0": {"passed": bool, "total_tokens": int, "model_id": str}, ...}
-    # Only contains tiers that were actually attempted.
+    # Per-tier: passed, total_tokens, model_id, answer_text (preview for debugging)
     tier_results: dict

@@ -37,7 +37,9 @@ decisions cost **zero** Fireworks tokens.
       `MODEL_TIER0..3`, `MODEL_JUDGE` (see `.env.example`)
 - [ ] `python -m data.generate_tasks` → creates `data/tasks_raw.jsonl` (free, local)
 - [ ] `python -m data.label_multitier` → creates `data/labeled_multitier.jsonl`
-      (**consumes Fireworks tokens**; resumable — safe to stop/restart)
+      (**consumes Fireworks tokens**; resumable; use `--sleep 5` if you hit 429)
+      If a row is wrong (e.g. `tier_label: none` from old judge), delete that line
+      from the jsonl and re-run — local graders now handle math/logic/sentiment/code_debug.
 - [ ] `python -m router.train_multitier_router` → trains classifier, saves checkpoint
 - [ ] `python -m eval.evaluate_strategies` → strategy comparison table
 - [ ] `python -m tests.smoke_test` → sanity checks before container build

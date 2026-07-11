@@ -1,19 +1,14 @@
 """Label each task with the cheapest model tier that passes grading.
 
 For every task in data/tasks_raw.jsonl, models are tried in order
-tier0 -> tier1 -> tier2 -> tier3. Each answer is graded (real test execution
-for code_generation, LLM judge for everything else). The first passing tier
-becomes the label.
+tier0 -> tier1 -> tier2 -> tier3. Each answer is graded (local graders
+where possible; LLM judge only for summarization/NER). The first passing
+tier becomes the label.
 
 Resumable: task IDs already present in data/labeled_multitier.jsonl are
-skipped, and results are appended one line at a time, so the script can be
-stopped and restarted without wasting tokens.
+skipped, and results are appended one line at a time.
 
-Modes:
-  default      stop at the first tier that passes (cheapest labeling run)
-  --all-tiers  grade EVERY tier for every task; costs more tokens but makes
-               eval/evaluate_strategies.py exact instead of assuming that
-               stronger tiers also pass.
+To re-label a bad row, remove its line from labeled_multitier.jsonl first.
 
 THIS SCRIPT CONSUMES FIREWORKS TOKENS. The human runs it explicitly.
 """
@@ -21,18 +16,20 @@ THIS SCRIPT CONSUMES FIREWORKS TOKENS. The human runs it explicitly.
 import argparse
 import json
 import logging
+import time
 from pathlib import Path
 
 from agent.fireworks_client import chat
 from config import get_model_id_for_tier, get_tier_names
-from data.judge import grade_code_answer, grade_text_answer
-from data.schema import CODE_CATEGORIES, LabeledExample, TaskExample
+from data.judge import grade_answer
+from data.schema import LabeledExample, TaskExample
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
 
 IN_PATH = Path(__file__).parent / "tasks_raw.jsonl"
 OUT_PATH = Path(__file__).parent / "labeled_multitier.jsonl"
+ANSWER_PREVIEW_LEN = 300
 
 
 def _load_done_ids() -> set[str]:
@@ -42,23 +39,25 @@ def _load_done_ids() -> set[str]:
         return {json.loads(line)["id"] for line in f if line.strip()}
 
 
-def _grade(task: TaskExample, answer_text: str) -> bool:
-    if task.category in CODE_CATEGORIES:
-        return grade_code_answer(task.ground_truth, answer_text)
-    return grade_text_answer(task.prompt, task.ground_truth, answer_text)
-
-
-def label_task(task: TaskExample, all_tiers: bool) -> LabeledExample:
+def label_task(
+    task: TaskExample,
+    all_tiers: bool,
+    tier_sleep: float,
+) -> LabeledExample:
     tier_results: dict = {}
     tier_label = "none"
-    for tier in get_tier_names():
+    tiers = get_tier_names()
+    for i, tier in enumerate(tiers):
+        if i > 0 and tier_sleep > 0:
+            time.sleep(tier_sleep)
         model_id = get_model_id_for_tier(tier)
         result = chat(model_id, task.prompt, max_tokens=700, temperature=0.2)
-        passed = _grade(task, result["text"])
+        passed = grade_answer(task.category, task.prompt, task.ground_truth, result["text"])
         tier_results[tier] = {
             "passed": passed,
             "total_tokens": result["total_tokens"],
             "model_id": model_id,
+            "answer_text": result["text"][:ANSWER_PREVIEW_LEN],
         }
         logger.info("  %s -> %s (%d tokens)", tier, "PASS" if passed else "FAIL",
                     result["total_tokens"])
@@ -76,6 +75,10 @@ def main() -> None:
                         help="grade every tier (more tokens, exact eval)")
     parser.add_argument("--limit", type=int, default=0,
                         help="label at most N new tasks this run (0 = no limit)")
+    parser.add_argument("--sleep", type=float, default=2.0,
+                        help="seconds to pause between tasks (default 2; helps avoid 429)")
+    parser.add_argument("--tier-sleep", type=float, default=1.0,
+                        help="seconds to pause between tier attempts within one task")
     args = parser.parse_args()
 
     if not IN_PATH.exists():
@@ -93,11 +96,12 @@ def main() -> None:
 
     counts: dict[str, int] = {}
     for i, task in enumerate(todo, 1):
+        if i > 1 and args.sleep > 0:
+            time.sleep(args.sleep)
         logger.info("[%d/%d] %s (%s/%s)", i, len(todo), task.id,
                     task.category, task.difficulty_pool)
-        labeled = label_task(task, args.all_tiers)
+        labeled = label_task(task, args.all_tiers, args.tier_sleep)
         counts[labeled.tier_label] = counts.get(labeled.tier_label, 0) + 1
-        # Append immediately so an interrupted run loses at most one task.
         with open(OUT_PATH, "a", encoding="utf-8") as f:
             f.write(labeled.model_dump_json() + "\n")
 
@@ -106,7 +110,8 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    # Human: run this when you're ready — it will consume Fireworks tokens:
-    #   python -m data.label_multitier            (early-stop, cheapest)
-    #   python -m data.label_multitier --all-tiers  (exact eval data)
+    # Human: run when ready — consumes Fireworks tokens:
+    #   python -m data.label_multitier --limit 5
+    #   python -m data.label_multitier --limit 5 --sleep 5   # slower, fewer 429s
+    # Re-label a bad row: delete its line from labeled_multitier.jsonl, then re-run.
     main()

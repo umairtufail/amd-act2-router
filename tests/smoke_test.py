@@ -43,6 +43,22 @@ def test_features_extract():
     assert extract_features("hello", "not_a_category")["category_index"] >= 0
 
 
+def test_local_graders():
+    from data.judge import (
+        grade_logic_answer,
+        grade_math_answer,
+        grade_sentiment_answer,
+    )
+
+    assert grade_math_answer("94", "The answer is 94.") is True
+    assert grade_math_answer("94", "93") is False
+    assert grade_logic_answer("Kai", "Kai") is True
+    assert grade_logic_answer("Kai", "The answer is Kai.") is True
+    assert grade_logic_answer("Kai", "Pia") is False
+    assert grade_sentiment_answer("negative", "negative") is True
+    assert grade_sentiment_answer("positive", "negative") is False
+
+
 def test_code_exec_grades_correctly():
     from data.code_exec import extract_code, run_tests
 
@@ -98,6 +114,7 @@ def main() -> int:
     checks = [
         test_config_resolves_all_tiers,
         test_features_extract,
+        test_local_graders,
         test_code_exec_grades_correctly,
         test_predict_tier_returns_valid_tier,
         test_route_returns_model_id,
