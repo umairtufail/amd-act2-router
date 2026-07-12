@@ -1,0 +1,25 @@
+{
+  "encoder_name": "distilbert-base-uncased",
+  "label_names": [
+    "cheap_ok",
+    "needs_strong"
+  ],
+  "label_to_index": {
+    "cheap_ok": 0,
+    "needs_strong": 1
+  },
+  "max_len": 256,
+  "best_val_acc": 0.9428571428571428,
+  "tau_default": 0.8,
+  "neg_multiple": 8,
+  "categories": [
+    "math_reasoning",
+    "logic_puzzles",
+    "sentiment",
+    "summarization",
+    "ner",
+    "code_debugging",
+    "code_generation",
+    "factual_knowledge"
+  ]
+}
