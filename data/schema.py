@@ -10,6 +10,7 @@ CATEGORIES = [
     "ner",
     "code_debugging",
     "code_generation",
+    "factual_knowledge",
 ]
 
 DIFFICULTY_POOLS = ["trivial", "medium", "hard", "adversarial"]

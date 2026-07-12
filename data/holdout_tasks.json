@@ -1,0 +1,434 @@
+[
+  {
+    "id": "holdout_math_01",
+    "category": "math_reasoning",
+    "prompt": "A store sells notebooks for 4 dollars each. If you buy 13 notebooks and pay with a 100 dollar bill, how much change do you get? Answer with the number only.",
+    "ground_truth": "48"
+  },
+  {
+    "id": "holdout_logic_01",
+    "category": "logic_puzzles",
+    "prompt": "3 people (Ana, Ben, Cal) stand in line at positions 1-3. Ana is at position 1. Ben is immediately to the right of Ana. Who is at position 3? Answer with the name only.",
+    "ground_truth": "Cal"
+  },
+  {
+    "id": "holdout_sentiment_01",
+    "category": "sentiment",
+    "prompt": "Classify the sentiment of this review as positive, negative, or neutral. Respond with exactly one word.\n\nReview: \"The food was cold and the waiter was rude.\"",
+    "ground_truth": "negative"
+  },
+  {
+    "id": "holdout_codegen_01",
+    "category": "code_generation",
+    "prompt": "Write a Python function abs_diff(a, b) that returns the absolute difference between integers a and b. Return the complete function in a ```python code block.",
+    "ground_truth": "{\"function_name\": \"abs_diff\", \"tests\": [{\"args\": [5, 3], \"expected\": 2}, {\"args\": [3, 5], \"expected\": 2}, {\"args\": [0, 0], \"expected\": 0}]}"
+  },
+  {
+    "id": "holdout_math_02",
+    "category": "math_reasoning",
+    "prompt": "A theater has 18 rows with 24 seats in each row. If 57 seats remain empty, how many seats are occupied? Answer with the number only.",
+    "ground_truth": "375"
+  },
+  {
+    "id": "holdout_math_03",
+    "category": "math_reasoning",
+    "prompt": "A 250-liter tank is three-fifths full. Then 37 liters are drained and 28 liters are added. How many liters are now in the tank? Answer with the number only.",
+    "ground_truth": "141"
+  },
+  {
+    "id": "holdout_math_04",
+    "category": "math_reasoning",
+    "prompt": "A driver travels 180 kilometers. The first 108 kilometers take 2 hours, and the remaining distance is driven at 36 kilometers per hour. How many hours does the entire trip take? Answer with the number only.",
+    "ground_truth": "4"
+  },
+  {
+    "id": "holdout_math_05",
+    "category": "math_reasoning",
+    "prompt": "One batch of muffins uses 2.5 cups of flour. How many cups are needed for 3 identical batches? Answer with the number only.",
+    "ground_truth": "7.5"
+  },
+  {
+    "id": "holdout_math_06",
+    "category": "math_reasoning",
+    "prompt": "A 160 dollar appliance is discounted by 25 percent, then 8 percent sales tax is applied to the discounted price. What is the final price in dollars? Answer with the number only.",
+    "ground_truth": "129.6"
+  },
+  {
+    "id": "holdout_math_07",
+    "category": "math_reasoning",
+    "prompt": "What is the sum of all integers from 1 through 40 that are not divisible by 5? Answer with the number only.",
+    "ground_truth": "640"
+  },
+  {
+    "id": "holdout_math_08",
+    "category": "math_reasoning",
+    "prompt": "Each worker packs 7 boxes every 18 minutes. How many boxes do 5 workers pack in 54 minutes if they all work at that constant rate? Answer with the number only.",
+    "ground_truth": "105"
+  },
+  {
+    "id": "holdout_math_09",
+    "category": "math_reasoning",
+    "prompt": "A rectangle has area 864 square units and width 24 units. What is its perimeter? Answer with the number only.",
+    "ground_truth": "120"
+  },
+  {
+    "id": "holdout_logic_02",
+    "category": "logic_puzzles",
+    "prompt": "Four people (Ari, Bea, Chen, Dario) stand in positions 1-4. Ari is at position 1. Dario is at position 4. Bea stands immediately to the left of Chen. Who is at position 2? Answer with the name only.",
+    "ground_truth": "Bea"
+  },
+  {
+    "id": "holdout_logic_03",
+    "category": "logic_puzzles",
+    "prompt": "Five runners (Lio, Mia, Noor, Omar, Pia) finish in positions 1-5. Lio is second, Mia finishes immediately after Lio, Noor immediately after Mia, and Omar is last. Who finishes first? Answer with the name only.",
+    "ground_truth": "Pia"
+  },
+  {
+    "id": "holdout_logic_04",
+    "category": "logic_puzzles",
+    "prompt": "Iris, Jules, and Kato each own a different pet: a bird, a cat, or a dog. Iris owns neither the cat nor the dog. Jules owns the dog. Who owns the cat? Answer with the name only.",
+    "ground_truth": "Kato"
+  },
+  {
+    "id": "holdout_logic_05",
+    "category": "logic_puzzles",
+    "prompt": "Four books (Yellow, Red, Blue, Green) occupy shelf positions 1-4. Green is at position 4, Yellow is immediately left of Red, and Red is left of Blue. Which book is at position 2? Answer with the color only.",
+    "ground_truth": "Red"
+  },
+  {
+    "id": "holdout_logic_06",
+    "category": "logic_puzzles",
+    "prompt": "Four musicians (Ren, Sol, Tia, Uma) perform in slots 1-4. Ren performs first, Sol performs last, and Tia performs immediately before Uma. Who performs in slot 3? Answer with the name only.",
+    "ground_truth": "Uma"
+  },
+  {
+    "id": "holdout_logic_07",
+    "category": "logic_puzzles",
+    "prompt": "Five parcels (Quartz, Rhea, Soren, Tarek, Uma) are delivered in order 1-5. Quartz is first, Tarek is last, Rhea is immediately after Soren, and Uma is before Soren. Which parcel is delivered third? Answer with the name only.",
+    "ground_truth": "Soren"
+  },
+  {
+    "id": "holdout_logic_08",
+    "category": "logic_puzzles",
+    "prompt": "Nia, Oren, Pax, and Quinn work on different floors 1-4. Quinn is on floor 1, Oren is on floor 2, Nia is above Oren, and Pax is immediately above Nia. Who works on floor 4? Answer with the name only.",
+    "ground_truth": "Pax"
+  },
+  {
+    "id": "holdout_logic_09",
+    "category": "logic_puzzles",
+    "prompt": "Five cyclists (Ema, Finn, Gia, Hugo, Ivo) finish in positions 1-5. Ema is first, Hugo is last, Ivo is immediately after Ema, and Finn is immediately before Gia. Who finishes fourth? Answer with the name only.",
+    "ground_truth": "Gia"
+  },
+  {
+    "id": "holdout_sentiment_02",
+    "category": "sentiment",
+    "prompt": "Classify the sentiment of this review as positive, negative, or neutral. Respond with exactly one word.\n\nReview: Absolutely delightful service; every detail was thoughtful and I would gladly return.",
+    "ground_truth": "positive"
+  },
+  {
+    "id": "holdout_sentiment_03",
+    "category": "sentiment",
+    "prompt": "Classify the sentiment of this review as positive, negative, or neutral. Respond with exactly one word.\n\nReview: The package arrived on Tuesday and contained the three items listed on the invoice.",
+    "ground_truth": "neutral"
+  },
+  {
+    "id": "holdout_sentiment_04",
+    "category": "sentiment",
+    "prompt": "Classify the sentiment of this review as positive, negative, or neutral. Respond with exactly one word.\n\nReview: The update deleted my saved files, and support ignored every message I sent.",
+    "ground_truth": "negative"
+  },
+  {
+    "id": "holdout_sentiment_05",
+    "category": "sentiment",
+    "prompt": "Classify the sentiment of this review as positive, negative, or neutral. Respond with exactly one word.\n\nReview: The museum is located beside the station and is open from ten until six.",
+    "ground_truth": "neutral"
+  },
+  {
+    "id": "holdout_sentiment_06",
+    "category": "sentiment",
+    "prompt": "Classify the sentiment of this review as positive, negative, or neutral. Respond with exactly one word.\n\nReview: This chair is sturdy, comfortable, and worth every cent.",
+    "ground_truth": "positive"
+  },
+  {
+    "id": "holdout_sentiment_07",
+    "category": "sentiment",
+    "prompt": "Classify the sentiment of this review as positive, negative, or neutral. Respond with exactly one word.\n\nReview: It is not terrible and not impressive; it performs the basic job described.",
+    "ground_truth": "neutral"
+  },
+  {
+    "id": "holdout_sentiment_08",
+    "category": "sentiment",
+    "prompt": "Classify the sentiment of this review as positive, negative, or neutral. Respond with exactly one word.\n\nReview: We waited two hours only to receive the wrong order, which was also cold.",
+    "ground_truth": "negative"
+  },
+  {
+    "id": "holdout_sentiment_09",
+    "category": "sentiment",
+    "prompt": "Classify the sentiment of this review as positive, negative, or neutral. Respond with exactly one word.\n\nReview: I expected a lot, yet the performance still exceeded every hope I had.",
+    "ground_truth": "positive"
+  },
+  {
+    "id": "holdout_summarization_01",
+    "category": "summarization",
+    "prompt": "Summarize the following passage in one or two sentences, preserving the main facts.\n\nThe city library will test extended weekend hours for six months beginning in October. Three neighborhood branches will stay open until 8 p.m. on Saturdays and will add Sunday service from noon to 5 p.m. A regional literacy grant will cover staffing and security, so the pilot will not reduce weekday programs. Officials will compare visitor counts, program attendance, and survey feedback with the same period last year before deciding whether to make the schedule permanent.",
+    "ground_truth": "The library will use a literacy grant to pilot longer Saturday hours and new Sunday hours at three branches for six months starting in October. Officials will use visits, program attendance, and feedback to decide whether to keep the schedule."
+  },
+  {
+    "id": "holdout_summarization_02",
+    "category": "summarization",
+    "prompt": "Summarize the following passage in one or two sentences, preserving the main facts.\n\nNorthstar Components has approved a 12 million dollar energy project at its main factory. Solar panels installed across four warehouse roofs are expected to provide about 40 percent of the site's annual electricity once they begin operating next spring. A battery system will be added by 2027 to store midday surplus for evening production. The company says construction will happen in phases without closing production lines or eliminating jobs, and it expects lower electricity purchases to repay the investment within nine years.",
+    "ground_truth": "Northstar is investing 12 million dollars in rooftop solar expected to supply 40 percent of its factory electricity next spring, with battery storage planned by 2027. Installation will not halt production or cut jobs, and projected savings should repay the cost within nine years."
+  },
+  {
+    "id": "holdout_summarization_03",
+    "category": "summarization",
+    "prompt": "Summarize the following passage in one or two sentences, preserving the main facts and limitations.\n\nResearchers randomly assigned 120 adults with mildly elevated blood pressure either to their usual routines or to a walking program. Participants in the program were asked to walk briskly for 30 minutes on five days each week for 12 weeks. Their systolic blood pressure fell by an average of six points, compared with one point in the control group. The authors cautioned that the study was short, relied partly on self-reported exercise, and did not establish whether the improvement would persist for a year.",
+    "ground_truth": "In a randomized 12-week study of 120 adults, brisk walking for 30 minutes five days a week reduced systolic blood pressure by about six points versus one in controls. The short duration and partly self-reported exercise leave long-term effects uncertain."
+  },
+  {
+    "id": "holdout_summarization_04",
+    "category": "summarization",
+    "prompt": "Summarize the following notice in one or two sentences, preserving dates and practical impacts.\n\nBecause inspectors found structural damage on Mill Creek Bridge, school buses cannot use the usual crossing while repairs are underway. Beginning September 3, routes 12 and 18 will detour along Harbor Road. The Pine Street and Market Square stops will move temporarily to Oak Avenue, and morning pickups may occur up to 15 minutes earlier. Families will receive exact times through the district app. The change is expected to last eight weeks, although the district will issue an update if bridge work finishes sooner.",
+    "ground_truth": "Starting September 3, bridge repairs will reroute school buses 12 and 18 via Harbor Road for about eight weeks, moving two stops to Oak Avenue and potentially making pickups 15 minutes earlier. Exact times and updates will be sent through the district app."
+  },
+  {
+    "id": "holdout_summarization_05",
+    "category": "summarization",
+    "prompt": "Summarize the following passage in one or two sentences, preserving the measured result and unresolved issue.\n\nA coastal restoration partnership has completed work on 45 hectares of marsh that had been choked by invasive reeds. Crews removed the reeds, reopened two tidal channels, and planted native cordgrass grown by a nearby university. Surveys this spring counted 28 percent more nesting shorebirds than before work began, and water tests showed improved oxygen levels. Researchers say at least three more years of monitoring are needed, however, and the project has not yet determined whether the restored marsh will reduce flooding during major storms.",
+    "ground_truth": "Restoration of 45 hectares of marsh removed invasive reeds, reopened tidal channels, and replanted natives; early surveys found 28 percent more nesting shorebirds and better oxygen levels. Longer monitoring is needed, and any flood-protection benefit remains unknown."
+  },
+  {
+    "id": "holdout_summarization_06",
+    "category": "summarization",
+    "prompt": "Summarize the following incident report in one or two sentences, preserving what was and was not exposed.\n\nA payroll vendor discovered that an employee entered credentials into a convincing phishing page, allowing an attacker to access one customer-support database for roughly two hours. The exposed records contained names and email addresses for about 8,400 people. The company says the database did not contain passwords, bank details, payment-card numbers, or government identification. It disabled the compromised account, reset staff credentials, added a second approval step for remote access, and began notifying affected customers on Friday.",
+    "ground_truth": "A phishing attack exposed names and email addresses for about 8,400 people during two hours of database access, but not passwords, financial data, or government IDs. The vendor disabled the account, reset credentials, strengthened remote access, and is notifying customers."
+  },
+  {
+    "id": "holdout_summarization_07",
+    "category": "summarization",
+    "prompt": "Summarize the following passage in one or two sentences, preserving the timeline and quantities.\n\nDivers surveying a merchant shipwreck in 2019 recovered 214 silver coins fused together by corrosion. Conservators spent four years separating and stabilizing the pieces with low-current electrolysis, revealing dates that place the cargo in the early eighteenth century. A new museum exhibition opening in November will display 70 of the best-preserved coins alongside navigation tools from the wreck. The remaining coins will stay in climate-controlled storage so researchers can study trade routes and metal sources without exposing the fragile surfaces to repeated handling.",
+    "ground_truth": "After four years of conservation, 214 silver coins recovered from a 2019 shipwreck were identified as early eighteenth century. Seventy will go on display in November, while the rest remain stored for research."
+  },
+  {
+    "id": "holdout_summarization_08",
+    "category": "summarization",
+    "prompt": "Summarize the following passage in one or two sentences, preserving the measured benefits, financing, and concern.\n\nA farming cooperative replaced flood irrigation with drip lines across 300 hectares of tomato fields. Meter readings from the first full season show water use fell 32 percent while average tomato yield rose 9 percent. The equipment's upfront cost was covered by a five-year low-interest loan shared among 46 farms, rather than by a government grant. Agronomists welcomed the results but warned that reduced flushing could allow salts to accumulate in some soils, so the cooperative will add salinity testing before the next planting season.",
+    "ground_truth": "Drip irrigation across 300 hectares cut water use 32 percent and raised tomato yields 9 percent, financed by a five-year loan shared by 46 farms. The cooperative will monitor possible soil-salt buildup before next season."
+  },
+  {
+    "id": "holdout_summarization_09",
+    "category": "summarization",
+    "prompt": "Summarize the following project update in one or two sentences, preserving the cause, schedule, cost, and current service.\n\nThe Eastlink rail extension will open in late 2028 rather than 2027 after tunneling crews encountered fractured rock and unexpected groundwater beneath the river. Engineers must redesign part of the lining and slow excavation while new pumps are installed. The changes are projected to add 430 million euros to the budget. Existing trains on the central line will continue operating during construction, and no stations are scheduled to close. The transport authority has commissioned an independent review of the geological surveys and will publish its findings next spring.",
+    "ground_truth": "Unexpected fractured rock and groundwater have delayed the Eastlink extension from 2027 to late 2028 and added an estimated 430 million euros. Existing central-line service will continue, while an independent review examines the earlier geological surveys."
+  },
+  {
+    "id": "holdout_ner_01",
+    "category": "ner",
+    "prompt": "Extract all named entities from the sentence below. Respond with ONLY a JSON object with keys \"persons\", \"organizations\", and \"locations\", each a list of strings.\n\nSentence: Professor Elena García left the García Institute in Madrid to join New York University's Center for Urban Science in New York.",
+    "ground_truth": "{\"persons\": [\"Elena García\"], \"organizations\": [\"García Institute\", \"New York University\", \"Center for Urban Science\"], \"locations\": [\"Madrid\", \"New York\"]}"
+  },
+  {
+    "id": "holdout_ner_02",
+    "category": "ner",
+    "prompt": "Extract all named entities from the sentence below. Respond with ONLY a JSON object with keys \"persons\", \"organizations\", and \"locations\", each a list of strings.\n\nSentence: Jordan Lee met lawyers from Lee & Jordan Partners in Amman before continuing a tour of Jordan.",
+    "ground_truth": "{\"persons\": [\"Jordan Lee\"], \"organizations\": [\"Lee & Jordan Partners\"], \"locations\": [\"Amman\", \"Jordan\"]}"
+  },
+  {
+    "id": "holdout_ner_03",
+    "category": "ner",
+    "prompt": "Extract all named entities from the sentence below. Respond with ONLY a JSON object with keys \"persons\", \"organizations\", and \"locations\", each a list of strings.\n\nSentence: Amazon engineer Grace River presented a River Labs drone in Manaus before its field test in the Amazon.",
+    "ground_truth": "{\"persons\": [\"Grace River\"], \"organizations\": [\"Amazon\", \"River Labs\"], \"locations\": [\"Manaus\", \"Amazon\"]}"
+  },
+  {
+    "id": "holdout_ner_04",
+    "category": "ner",
+    "prompt": "Extract all named entities from the sentence below. Respond with ONLY a JSON object with keys \"persons\", \"organizations\", and \"locations\", each a list of strings.\n\nSentence: Dr. Amina Yusuf and Jean-Luc Picard represented the World Health Organization in Geneva, where they met Mei Tan of Médecins Sans Frontières.",
+    "ground_truth": "{\"persons\": [\"Amina Yusuf\", \"Jean-Luc Picard\", \"Mei Tan\"], \"organizations\": [\"World Health Organization\", \"Médecins Sans Frontières\"], \"locations\": [\"Geneva\"]}"
+  },
+  {
+    "id": "holdout_ner_05",
+    "category": "ner",
+    "prompt": "Extract all named entities from the sentence below. Respond with ONLY a JSON object with keys \"persons\", \"organizations\", and \"locations\", each a list of strings.\n\nSentence: Paris-based Paris Systems appointed Paris Morgan to lead its new office in Lyon.",
+    "ground_truth": "{\"persons\": [\"Paris Morgan\"], \"organizations\": [\"Paris Systems\"], \"locations\": [\"Paris\", \"Lyon\"]}"
+  },
+  {
+    "id": "holdout_ner_06",
+    "category": "ner",
+    "prompt": "Extract all named entities from the sentence below. Respond with ONLY a JSON object with keys \"persons\", \"organizations\", and \"locations\", each a list of strings.\n\nSentence: May Chen of the Reading Group traveled from Reading to Bath in May.",
+    "ground_truth": "{\"persons\": [\"May Chen\"], \"organizations\": [\"Reading Group\"], \"locations\": [\"Reading\", \"Bath\"]}"
+  },
+  {
+    "id": "holdout_ner_07",
+    "category": "ner",
+    "prompt": "Extract all named entities from the sentence below. Respond with ONLY a JSON object with keys \"persons\", \"organizations\", and \"locations\", each a list of strings.\n\nSentence: Bank of America analyst Luis Ortega flew from Mexico City to Santiago for the conference.",
+    "ground_truth": "{\"persons\": [\"Luis Ortega\"], \"organizations\": [\"Bank of America\"], \"locations\": [\"Mexico City\", \"Santiago\"]}"
+  },
+  {
+    "id": "holdout_ner_08",
+    "category": "ner",
+    "prompt": "Extract all named entities from the sentence below. Respond with ONLY a JSON object with keys \"persons\", \"organizations\", and \"locations\", each a list of strings.\n\nSentence: Siobhán O'Connor moved O'Connor & Sons from Derry to Belfast.",
+    "ground_truth": "{\"persons\": [\"Siobhán O'Connor\"], \"organizations\": [\"O'Connor & Sons\"], \"locations\": [\"Derry\", \"Belfast\"]}"
+  },
+  {
+    "id": "holdout_ner_09",
+    "category": "ner",
+    "prompt": "Extract all named entities from the sentence below. Respond with ONLY a JSON object with keys \"persons\", \"organizations\", and \"locations\", each a list of strings.\n\nSentence: King's College London professor Kwame Mensah addressed the Royal Society during a forum in London.",
+    "ground_truth": "{\"persons\": [\"Kwame Mensah\"], \"organizations\": [\"King's College London\", \"Royal Society\"], \"locations\": [\"London\"]}"
+  },
+  {
+    "id": "holdout_code_debugging_01",
+    "category": "code_debugging",
+    "prompt": "What is the exact output printed by this Python program? Answer with the output only, no explanation.\n\n```python\nrows = [[0] * 2] * 3\nrows[1][0] = 7\nprint(rows)\n```",
+    "ground_truth": "[[7, 0], [7, 0], [7, 0]]"
+  },
+  {
+    "id": "holdout_code_debugging_02",
+    "category": "code_debugging",
+    "prompt": "What is the exact output printed by this Python program? Answer with the output only, no explanation.\n\n```python\ndata = {'a': 1}\nview = data\nview['b'] = 2\nprint(len(data), sorted(data))\n```",
+    "ground_truth": "2 ['a', 'b']"
+  },
+  {
+    "id": "holdout_code_debugging_03",
+    "category": "code_debugging",
+    "prompt": "What is the exact output printed by this Python program? Answer with the output only, no explanation.\n\n```python\nvalues = [0, '', [], [0]]\nprint([bool(value) for value in values])\n```",
+    "ground_truth": "[False, False, False, True]"
+  },
+  {
+    "id": "holdout_code_debugging_04",
+    "category": "code_debugging",
+    "prompt": "What is the exact output printed by this Python program? Answer with the output only, no explanation.\n\n```python\nnums = list(range(6))\nnums[1:5:2] = [9, 8]\nprint(nums)\n```",
+    "ground_truth": "[0, 9, 2, 8, 4, 5]"
+  },
+  {
+    "id": "holdout_code_debugging_05",
+    "category": "code_debugging",
+    "prompt": "What is the exact output printed by this Python program? Answer with the output only, no explanation.\n\n```python\ndef choose():\n    try:\n        return 'try'\n    finally:\n        return 'finally'\n\nprint(choose())\n```",
+    "ground_truth": "finally"
+  },
+  {
+    "id": "holdout_code_debugging_06",
+    "category": "code_debugging",
+    "prompt": "What is the exact output printed by this Python program? Answer with the output only, no explanation.\n\n```python\npairs = [(i, i * i) for i in range(4) if i % 2]\nprint(pairs)\n```",
+    "ground_truth": "[(1, 1), (3, 9)]"
+  },
+  {
+    "id": "holdout_code_debugging_07",
+    "category": "code_debugging",
+    "prompt": "What is the exact output printed by this Python program? Answer with the output only, no explanation.\n\n```python\ntext = 'banana'\nprint(text.replace('ana', 'X'))\n```",
+    "ground_truth": "bXna"
+  },
+  {
+    "id": "holdout_code_debugging_08",
+    "category": "code_debugging",
+    "prompt": "What is the exact output printed by this Python program? Answer with the output only, no explanation.\n\n```python\na = [[1], [2]]\nb = a.copy()\nb[0].append(3)\nb.append([4])\nprint(a)\nprint(b)\n```",
+    "ground_truth": "[[1, 3], [2]]\n[[1, 3], [2], [4]]"
+  },
+  {
+    "id": "holdout_code_debugging_09",
+    "category": "code_debugging",
+    "prompt": "What is the exact output printed by this Python program? Answer with the output only, no explanation.\n\n```python\ncounter = 0\ndef bump():\n    global counter\n    counter += 1\n    return counter\n\nprint(bump() + bump())\nprint(counter)\n```",
+    "ground_truth": "3\n2"
+  },
+  {
+    "id": "holdout_codegen_02",
+    "category": "code_generation",
+    "prompt": "Write a Python function clamp(value, low, high) that returns low when value is below low, high when it is above high, and value otherwise. Return the complete function in a ```python code block.",
+    "ground_truth": "{\"function_name\": \"clamp\", \"tests\": [{\"args\": [5, 0, 10], \"expected\": 5}, {\"args\": [-3, 0, 10], \"expected\": 0}, {\"args\": [14, 0, 10], \"expected\": 10}]}"
+  },
+  {
+    "id": "holdout_codegen_03",
+    "category": "code_generation",
+    "prompt": "Write a Python function count_vowels(text) that returns the number of a, e, i, o, or u characters in text, ignoring case. Return the complete function in a ```python code block.",
+    "ground_truth": "{\"function_name\": \"count_vowels\", \"tests\": [{\"args\": [\"Alphabet\"], \"expected\": 3}, {\"args\": [\"rhythms\"], \"expected\": 0}, {\"args\": [\"\"], \"expected\": 0}]}"
+  },
+  {
+    "id": "holdout_codegen_04",
+    "category": "code_generation",
+    "prompt": "Write a Python function rotate_left(items, k) that returns a new list rotated left by k positions, supports k larger than the list, and returns an empty list for empty input. Return the complete function in a ```python code block.",
+    "ground_truth": "{\"function_name\": \"rotate_left\", \"tests\": [{\"args\": [[1, 2, 3, 4], 1], \"expected\": [2, 3, 4, 1]}, {\"args\": [[1, 2, 3, 4], 6], \"expected\": [3, 4, 1, 2]}, {\"args\": [[], 3], \"expected\": []}]}"
+  },
+  {
+    "id": "holdout_codegen_05",
+    "category": "code_generation",
+    "prompt": "Write a Python function merge_counts(first, second) that returns a new dictionary containing every key from both input dictionaries, adding values when a key appears in both. Do not mutate either input. Return the complete function in a ```python code block.",
+    "ground_truth": "{\"function_name\": \"merge_counts\", \"tests\": [{\"args\": [{\"a\": 2, \"b\": 1}, {\"b\": 4, \"c\": 3}], \"expected\": {\"a\": 2, \"b\": 5, \"c\": 3}}, {\"args\": [{}, {\"x\": 7}], \"expected\": {\"x\": 7}}, {\"args\": [{\"z\": -1}, {\"z\": 1}], \"expected\": {\"z\": 0}}]}"
+  },
+  {
+    "id": "holdout_codegen_06",
+    "category": "code_generation",
+    "prompt": "Write a Python function first_unique(text) that returns the first character occurring exactly once in text, or None if no character is unique. Return the complete function in a ```python code block.",
+    "ground_truth": "{\"function_name\": \"first_unique\", \"tests\": [{\"args\": [\"swiss\"], \"expected\": \"w\"}, {\"args\": [\"aabbc\"], \"expected\": \"c\"}, {\"args\": [\"aabb\"], \"expected\": null}]}"
+  },
+  {
+    "id": "holdout_codegen_07",
+    "category": "code_generation",
+    "prompt": "Write a Python function chunk_sums(values, size) that splits values into consecutive chunks of at most size elements and returns the sum of each chunk. Assume size is positive. Return the complete function in a ```python code block.",
+    "ground_truth": "{\"function_name\": \"chunk_sums\", \"tests\": [{\"args\": [[1, 2, 3, 4, 5], 2], \"expected\": [3, 7, 5]}, {\"args\": [[], 3], \"expected\": []}, {\"args\": [[-1, 1, 2], 2], \"expected\": [0, 2]}]}"
+  },
+  {
+    "id": "holdout_codegen_08",
+    "category": "code_generation",
+    "prompt": "Write a Python function is_palindrome(text) that returns whether text is a palindrome after removing non-alphanumeric characters and ignoring case. Return the complete function in a ```python code block.",
+    "ground_truth": "{\"function_name\": \"is_palindrome\", \"tests\": [{\"args\": [\"Never odd or even\"], \"expected\": true}, {\"args\": [\"OpenAI\"], \"expected\": false}, {\"args\": [\"\"], \"expected\": true}]}"
+  },
+  {
+    "id": "holdout_codegen_09",
+    "category": "code_generation",
+    "prompt": "Write a Python function running_max(values) that returns a list whose element at each position is the largest value seen up to and including that position. Return the complete function in a ```python code block.",
+    "ground_truth": "{\"function_name\": \"running_max\", \"tests\": [{\"args\": [[3, 1, 4, 2, 5]], \"expected\": [3, 3, 4, 4, 5]}, {\"args\": [[-2, -5, -1]], \"expected\": [-2, -2, -1]}, {\"args\": [[]], \"expected\": []}]}"
+  },
+  {
+    "id": "holdout_factual_01",
+    "category": "factual_knowledge",
+    "prompt": "What is the capital city of Canada? Answer with the name only.",
+    "ground_truth": "Ottawa"
+  },
+  {
+    "id": "holdout_factual_02",
+    "category": "factual_knowledge",
+    "prompt": "Which chemical element has the symbol Fe? Answer with the name only.",
+    "ground_truth": "iron"
+  },
+  {
+    "id": "holdout_factual_03",
+    "category": "factual_knowledge",
+    "prompt": "Who wrote the novel Pride and Prejudice? Answer with the name only.",
+    "ground_truth": "Jane Austen"
+  },
+  {
+    "id": "holdout_factual_04",
+    "category": "factual_knowledge",
+    "prompt": "Which planet is home to the Great Red Spot? Answer with the name only.",
+    "ground_truth": "Jupiter"
+  },
+  {
+    "id": "holdout_factual_05",
+    "category": "factual_knowledge",
+    "prompt": "What process lets plants convert light energy into chemical energy? Answer with the term only.",
+    "ground_truth": "photosynthesis"
+  },
+  {
+    "id": "holdout_factual_06",
+    "category": "factual_knowledge",
+    "prompt": "Which civilization built Machu Picchu? Answer with the name only.",
+    "ground_truth": "Inca Empire||Inca"
+  },
+  {
+    "id": "holdout_factual_07",
+    "category": "factual_knowledge",
+    "prompt": "What instrument is used to measure atmospheric pressure? Answer with the term only.",
+    "ground_truth": "barometer"
+  },
+  {
+    "id": "holdout_factual_08",
+    "category": "factual_knowledge",
+    "prompt": "Which artist sculpted the marble statue David completed in 1504 and displayed at Florence's Galleria dell'Accademia? Answer with the name only.",
+    "ground_truth": "Michelangelo"
+  },
+  {
+    "id": "holdout_factual_09",
+    "category": "factual_knowledge",
+    "prompt": "In which country is the historic city of Timbuktu located? Answer with the country name only.",
+    "ground_truth": "Mali"
+  }
+]

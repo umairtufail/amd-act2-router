@@ -53,6 +53,7 @@ def chat(
     prompt: str,
     max_tokens: int = 700,
     temperature: float = 0.2,
+    response_format: dict | None = None,
 ) -> dict:
     """Call Fireworks chat completion for a single prompt.
 
@@ -66,6 +67,8 @@ def chat(
         "max_tokens": max_tokens,
         "temperature": temperature,
     }
+    if response_format is not None:
+        payload["response_format"] = response_format
     headers = {
         "Authorization": f"Bearer {_api_key()}",
         "Content-Type": "application/json",

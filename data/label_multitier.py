@@ -75,6 +75,9 @@ def main() -> None:
                         help="grade every tier (more tokens, exact eval)")
     parser.add_argument("--limit", type=int, default=0,
                         help="label at most N new tasks this run (0 = no limit)")
+    parser.add_argument("--until-total", type=int, default=0,
+                        help="stop once the output file has this many labeled rows "
+                             "(e.g. 176); overrides --limit when both set")
     parser.add_argument("--sleep", type=float, default=2.0,
                         help="seconds to pause between tasks (default 2; helps avoid 429)")
     parser.add_argument("--tier-sleep", type=float, default=1.0,
@@ -89,10 +92,18 @@ def main() -> None:
 
     done = _load_done_ids()
     todo = [t for t in tasks if t.id not in done]
-    if args.limit:
+    if args.until_total:
+        need = max(args.until_total - len(done), 0)
+        if need == 0:
+            logger.info("Already at %d labeled (target %d). Nothing to do.",
+                        len(done), args.until_total)
+            return
+        todo = todo[:need]
+    elif args.limit:
         todo = todo[: args.limit]
-    logger.info("Total tasks: %d | already labeled: %d | labeling now: %d",
-                len(tasks), len(done), len(todo))
+    logger.info("Total tasks: %d | already labeled: %d | labeling now: %d%s",
+                len(tasks), len(done), len(todo),
+                f" (target total {args.until_total})" if args.until_total else "")
 
     counts: dict[str, int] = {}
     for i, task in enumerate(todo, 1):

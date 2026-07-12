@@ -1,10 +1,11 @@
-"""Generate the raw task dataset across 7 categories.
+"""Generate the raw task dataset across 8 categories.
 
 Design principles (following the official tutorial's methodology, extended):
-- Every ground truth is verified programmatically at generation time:
-  math answers are computed in Python, logic puzzles are brute-force checked
-  for solution uniqueness, code-debugging outputs are captured by actually
-  running the snippet, and code-generation specs carry executable tests.
+- Ground truths are deterministic and auditable: math answers are computed in
+  Python, logic puzzles are brute-force checked for solution uniqueness,
+  code-debugging outputs are captured by actually running the snippet,
+  code-generation specs carry executable tests, and factual answers come from
+  a curated bank of stable facts.
 - Tasks span difficulty pools (trivial/medium/hard/adversarial) so the
   multi-tier labeling step has a real spread to measure.
 
@@ -408,6 +409,52 @@ def _gen_code_generation(rng: random.Random, n: int) -> list[dict]:
 
 
 # ---------------------------------------------------------------------------
+# factual_knowledge — curated, stable facts with short deterministic answers
+# ---------------------------------------------------------------------------
+
+# Items are interleaved by difficulty so any prefix remains approximately
+# balanced. Ground truth is a canonical answer with optional accepted aliases
+# separated by ``||``; see data.judge.grade_factual_answer.
+_FACTUAL_ITEMS = [
+    ("trivial", "What is the capital city of France?", "Paris"),
+    ("medium", "What is the SI unit of electrical resistance?", "ohm"),
+    ("hard", "Which chemical element has atomic number 74?", "tungsten||wolfram"),
+    ("adversarial", "Sydney and Melbourne are major Australian cities, but what is the capital of Australia?", "Canberra"),
+    ("trivial", "What is the largest planet in the Solar System?", "Jupiter"),
+    ("medium", "Who painted the anti-war mural Guernica?", "Pablo Picasso||Picasso"),
+    ("hard", "Which moon of Saturn has a dense atmosphere made mostly of nitrogen?", "Titan"),
+    ("adversarial", "Despite its name, in which country did the Panama hat originate?", "Ecuador"),
+    ("trivial", "What is the chemical formula for water?", "H2O"),
+    ("medium", "Who wrote the novel 1984?", "George Orwell"),
+    ("hard", "To which language family does Hungarian belong?", "Uralic"),
+    ("adversarial", "Which country gave the Statue of Liberty to the United States?", "France"),
+    ("trivial", "What is the capital city of Japan?", "Tokyo"),
+    ("medium", "What is the largest organ of the human body?", "skin"),
+    ("hard", "What charter was sealed by King John of England in 1215?", "Magna Carta"),
+    ("adversarial", "Which sea is defined by ocean currents rather than by land boundaries?", "Sargasso Sea"),
+    ("trivial", "Which planet is commonly called the Red Planet?", "Mars"),
+    ("medium", "Which chemical element has the symbol Au?", "gold"),
+    ("hard", "Which continent lies in all four hemispheres?", "Africa"),
+    ("adversarial", "Which planet has the shortest rotation period, and therefore the shortest day, in the Solar System?", "Jupiter"),
+    ("trivial", "What is the largest ocean on Earth?", "Pacific Ocean||Pacific"),
+    ("medium", "Which organelle is commonly called the powerhouse of the cell?", "mitochondrion||mitochondria"),
+    ("hard", "What collective name is given to the 1648 treaties that ended the Thirty Years' War?", "Peace of Westphalia"),
+    ("adversarial", "Which sovereign country is completely surrounded by South Africa?", "Lesotho"),
+]
+
+
+def _gen_factual_knowledge(rng: random.Random, n: int) -> list[dict]:
+    del rng  # The curated fact bank is deterministic by design.
+    tasks = []
+    for i in range(n):
+        pool, question, answer = _FACTUAL_ITEMS[i % len(_FACTUAL_ITEMS)]
+        prompt = f"{question} Answer with the name or term only."
+        tasks.append(dict(category="factual_knowledge", difficulty_pool=pool,
+                          prompt=prompt, ground_truth=answer))
+    return tasks
+
+
+# ---------------------------------------------------------------------------
 
 _GENERATORS = {
     "math_reasoning": _gen_math,
@@ -417,13 +464,14 @@ _GENERATORS = {
     "ner": _gen_ner,
     "code_debugging": _gen_code_debugging,
     "code_generation": _gen_code_generation,
+    "factual_knowledge": _gen_factual_knowledge,
 }
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate raw router-training tasks.")
     parser.add_argument("--per-category", type=int, default=22,
-                        help="number of tasks per category (default 22, ~154 total)")
+                        help="number of tasks per category (default 22, ~176 total)")
     parser.add_argument("--seed", type=int, default=7, help="RNG seed for reproducibility")
     args = parser.parse_args()
 

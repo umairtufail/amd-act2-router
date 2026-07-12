@@ -5,7 +5,8 @@ Routing is decided locally (zero Fireworks tokens in the default mode);
 answers are always generated via Fireworks with ALLOWED_MODELS.
 
 ROUTER_MODE env var selects the routing strategy without code changes:
-  multitier       local fine-tuned classifier (default, submission mode)
+  binary          local tier0/tier3 classifier (default, submission mode)
+  multitier       legacy local 4-class classifier (A/B mode)
   prompt_baseline LLM-based tier classification (costs tokens; for A/B tests)
   always_tier0    fixed cheapest tier
   always_tier3    fixed strongest tier
@@ -23,13 +24,13 @@ import time
 from collections import Counter
 from pathlib import Path
 
-from agent.fireworks_client import chat_safe
+from agent.llm_backend import answer_chat_safe as chat_safe
 from config import get_model_id_for_tier, get_tier_names
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger("agent")
 
-ROUTER_MODE = os.environ.get("ROUTER_MODE", "multitier")
+ROUTER_MODE = os.environ.get("ROUTER_MODE", "binary")
 INPUT_PATH = Path(os.environ.get("INPUT_PATH", "/input/tasks.json"))
 OUTPUT_PATH = Path(os.environ.get("OUTPUT_PATH", "/output/results.json"))
 ANSWER_MAX_TOKENS = int(os.environ.get("ANSWER_MAX_TOKENS", "700"))
@@ -46,7 +47,19 @@ def route(prompt: str, category: str | None = None) -> tuple[str, str, int]:
     elif ROUTER_MODE == "prompt_baseline":
         from baseline.baseline_router import classify_tier
         tier, tokens = classify_tier(prompt)
-    else:  # multitier — the local classifier, zero tokens
+    elif ROUTER_MODE == "binary":
+        from router.infer_binary_router import checkpoint_available
+
+        if checkpoint_available():
+            from router.route_binary import choose_binary_tier
+
+            tier, tokens = choose_binary_tier(prompt, category), 0
+        else:
+            logger.warning(
+                "No binary router checkpoint found - falling back to %s.", tiers[0]
+            )
+            tier, tokens = tiers[0], 0
+    elif ROUTER_MODE == "multitier":
         from router.infer_multitier_router import checkpoint_available, predict_tier
         if checkpoint_available():
             tier, tokens = predict_tier(prompt, category), 0
@@ -55,6 +68,11 @@ def route(prompt: str, category: str | None = None) -> tuple[str, str, int]:
             # of crashing the whole run.
             logger.warning("No router checkpoint found — falling back to %s.", tiers[0])
             tier, tokens = tiers[0], 0
+    else:
+        raise ValueError(
+            f"Unknown ROUTER_MODE {ROUTER_MODE!r}; expected binary, multitier, "
+            "prompt_baseline, always_tier0, or always_tier3"
+        )
 
     return tier, get_model_id_for_tier(tier), tokens
 

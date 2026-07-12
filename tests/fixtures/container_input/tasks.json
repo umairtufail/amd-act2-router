@@ -1,0 +1,12 @@
+[
+  {
+    "task_id": "container_ner_01",
+    "category": "ner",
+    "prompt": "Extract all named entities from this sentence. Return only JSON with keys persons, organizations, and locations, each containing a list of strings: Ada Lovelace visited the Royal Society in London."
+  },
+  {
+    "task_id": "container_factual_01",
+    "category": "factual_knowledge",
+    "prompt": "What is the capital city of Canada? Answer with the name only."
+  }
+]

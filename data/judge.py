@@ -6,6 +6,7 @@ Grading strategy by category (cheapest reliable method first):
 - logic_puzzles    → match ground-truth name locally (free)
 - sentiment        → match classification label locally (free)
 - code_debugging   → match expected program output locally (free)
+- factual_knowledge → normalized short-answer/alias match locally (free)
 - summarization, ner → LLM judge (MODEL_JUDGE; consumes tokens)
 
 The LLM judge uses a high max_tokens budget so reasoning models can finish
@@ -17,9 +18,9 @@ from __future__ import annotations
 import json
 import logging
 import re
+import unicodedata
 
-from agent.fireworks_client import chat
-from config import get_judge_model_id
+from agent.llm_backend import judge_chat
 from data.code_exec import extract_code, run_tests
 
 logger = logging.getLogger(__name__)
@@ -35,8 +36,11 @@ Ground truth (correct answer or required key facts):
 Model's answer:
 {answer}
 
-Is the model's answer correct? Judge semantic correctness, not wording:
-summaries/extractions must contain the ground truth facts without contradictions.
+Is the model's answer correct? Follow the requirements in the Question and judge
+semantic correctness, not wording. The ground truth is a reference, not a demand
+that a concise summary repeat every detail: a summary passes when it preserves the
+main facts explicitly requested by the Question without contradiction. For named
+entity extraction, all ground-truth entities must be present in the correct lists.
 
 Respond with ONLY a JSON object on its own, no other text:
 {{"correct": true}} or {{"correct": false}}"""
@@ -50,17 +54,20 @@ JUDGE_MAX_TOKENS = 700
 
 def _parse_verdict(text: str) -> bool:
     """Extract correct=true/false from judge output."""
-    match = _JSON_RE.search(text)
-    if match:
+    # Prefer the last object in case an unconstrained local model discusses the
+    # requested schema before emitting its actual verdict.
+    for match in reversed(list(_JSON_RE.finditer(text))):
         try:
-            return bool(json.loads(match.group(0)).get("correct", False))
+            value = json.loads(match.group(0)).get("correct")
+            if isinstance(value, bool):
+                return value
         except json.JSONDecodeError:
             pass
     # Fallback: reasoning models sometimes emit bare "correct": true without braces.
     m = _CORRECT_RE.search(text)
     if m:
         return m.group(1).lower() == "true"
-    logger.warning("Judge returned no parseable verdict, treating as FAIL: %r", text[:200])
+    logger.warning("Judge returned no Boolean verdict, treating as FAIL: %r", text[:200])
     return False
 
 
@@ -117,6 +124,33 @@ def grade_code_debugging_answer(ground_truth: str, answer: str) -> bool:
     return expected in got
 
 
+def _normalize_factual_text(text: str) -> str:
+    """Normalize case, Unicode variants, punctuation, and whitespace."""
+    normalized = unicodedata.normalize("NFKD", text).casefold()
+    normalized = "".join(ch for ch in normalized if not unicodedata.combining(ch))
+    return " ".join(re.findall(r"\w+", normalized, flags=re.UNICODE))
+
+
+def grade_factual_answer(ground_truth: str, answer: str) -> bool:
+    """Match a concise factual answer against canonical and ``||`` aliases."""
+    got = _normalize_factual_text(answer)
+    if not got:
+        return False
+
+    # Permit only a few harmless, anchored wrappers. Substring matching would
+    # incorrectly accept contradictory answers such as "Paris, not London".
+    for prefix in ("the correct answer is ", "the answer is ", "answer "):
+        if got.startswith(prefix):
+            got = got[len(prefix):]
+            break
+
+    for raw_alias in ground_truth.split("||"):
+        alias = _normalize_factual_text(raw_alias)
+        if alias and got == alias:
+            return True
+    return False
+
+
 def grade_text_answer(prompt: str, ground_truth: str, answer: str) -> bool:
     """LLM judge for open-ended tasks (summarization, NER). Consumes tokens."""
     import os
@@ -125,7 +159,7 @@ def grade_text_answer(prompt: str, ground_truth: str, answer: str) -> bool:
     judge_prompt = JUDGE_PROMPT.format(
         prompt=prompt, ground_truth=ground_truth, answer=answer
     )
-    result = chat(get_judge_model_id(), judge_prompt, max_tokens=max_tokens, temperature=0.0)
+    result = judge_chat(judge_prompt, max_tokens=max_tokens, temperature=0.0)
     return _parse_verdict(result["text"])
 
 
@@ -147,5 +181,7 @@ def grade_answer(category: str, prompt: str, ground_truth: str, answer: str) -> 
         return grade_sentiment_answer(ground_truth, answer)
     if category == "code_debugging":
         return grade_code_debugging_answer(ground_truth, answer)
+    if category == "factual_knowledge":
+        return grade_factual_answer(ground_truth, answer)
     # summarization, ner, and anything else → LLM judge
     return grade_text_answer(prompt, ground_truth, answer)
