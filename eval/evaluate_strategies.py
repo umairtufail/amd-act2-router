@@ -4,6 +4,8 @@ Strategies:
   always_tier0      always the cheapest model
   always_tier3      always the strongest model
   multitier_router  the local fine-tuned classifier (needs a trained checkpoint)
+  binary_router     category rules + local cheap_ok probability threshold
+  binary router tau sweep over 0.6, 0.7, 0.8, and 0.9
   prompt_baseline   LLM-based classification — OPT-IN via --include-prompt-baseline
                     because it makes a real Fireworks call per example
 
@@ -30,6 +32,7 @@ logger = logging.getLogger(__name__)
 
 DATA_PATH = Path(__file__).parent.parent / "data" / "labeled_multitier.jsonl"
 OUT_PATH = Path(__file__).parent / "results.json"
+BINARY_TAU_SWEEP = (0.6, 0.7, 0.8, 0.9)
 
 
 def load_records() -> list[dict]:
@@ -108,14 +111,57 @@ def main() -> None:
     results["always_tier0"] = simulate(records, lambda r: cheapest)
     results["always_tier3"] = simulate(records, lambda r: strongest)
 
-    # Local fine-tuned router (zero routing tokens).
-    from router.infer_multitier_router import checkpoint_available, predict_tier
-    if checkpoint_available():
+    # Local fine-tuned multitier router (zero routing tokens).
+    from router.infer_multitier_router import (
+        checkpoint_available as multitier_checkpoint_available,
+        predict_tier as predict_multitier,
+    )
+    if multitier_checkpoint_available():
         results["multitier_router"] = simulate(
-            records, lambda r: predict_tier(r["prompt"], r.get("category")))
+            records,
+            lambda r: predict_multitier(r["prompt"], r.get("category")),
+        )
     else:
         logger.warning("Skipping multitier_router: no checkpoint. "
                        "Train first: python -m router.train_multitier_router\n")
+
+    # Binary router: evaluate the same category-aware policy used by the agent.
+    # Cache probabilities by prompt/category so the default strategy and all
+    # four thresholds reuse a single DistilBERT inference per unique routed
+    # input. EASY_CATEGORIES short-circuit inside choose_binary_tier.
+    from router.infer_binary_router import (
+        checkpoint_available as binary_checkpoint_available,
+        predict_cheap_ok_proba,
+    )
+    from router.route_binary import choose_binary_tier
+
+    binary_sweep: dict[str, dict] = {}
+    if binary_checkpoint_available():
+        probability_cache: dict[tuple[str, str | None], float] = {}
+
+        def cached_probability(prompt: str, category: str | None) -> float:
+            key = (prompt, category)
+            if key not in probability_cache:
+                probability_cache[key] = predict_cheap_ok_proba(prompt, category)
+            return probability_cache[key]
+
+        def binary_tier(rec: dict, tau: float | None = None) -> str:
+            return choose_binary_tier(
+                rec["prompt"],
+                rec.get("category"),
+                tau=tau,
+                predict_proba=cached_probability,
+            )
+
+        results["binary_router"] = simulate(records, binary_tier)
+        for tau in BINARY_TAU_SWEEP:
+            binary_sweep[f"{tau:.1f}"] = simulate(
+                records,
+                lambda r, threshold=tau: binary_tier(r, threshold),
+            )
+    else:
+        logger.warning("Skipping binary_router and tau sweep: no checkpoint. "
+                       "Train first: python -m router.train_binary_router\n")
 
     # Prompt baseline (costs real tokens per example) — opt-in.
     if args.include_prompt_baseline:
@@ -150,6 +196,35 @@ def main() -> None:
                         name, r["assumed_outcomes"])
         if "tier_usage" in r:
             logger.info("%s tier usage: %s", name, r["tier_usage"])
+
+    if binary_sweep:
+        logger.info("\nBinary router tau sweep:")
+        sweep_header = (
+            f"{'τ':>4} {'Accuracy':>9} {'Total tok':>10} {'Tok/ex':>8} "
+            f"{'tier0%':>8} {'tier3%':>8}"
+        )
+        logger.info(sweep_header)
+        logger.info("-" * len(sweep_header))
+        for tau, r in binary_sweep.items():
+            total = max(r["total"], 1)
+            tier0_pct = r["tier_usage"].get(cheapest, 0) / total
+            tier3_pct = r["tier_usage"].get(strongest, 0) / total
+            logger.info(
+                f"{tau:>4} {r['accuracy']:>8.1%} {r['total_tokens']:>10,} "
+                f"{r['tokens_per_example']:>8.1f} {tier0_pct:>8.1%} "
+                f"{tier3_pct:>8.1%}"
+            )
+        for tau, r in binary_sweep.items():
+            if r["assumed_outcomes"]:
+                logger.info(
+                    "note: binary_router tau=%s used %d assumed (not measured) "
+                    "outcomes.",
+                    tau,
+                    r["assumed_outcomes"],
+                )
+
+        # Keep the nested sweep out of the uniform main-strategy table above.
+        results["binary_router_tau_sweep"] = binary_sweep
 
     with open(OUT_PATH, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2)

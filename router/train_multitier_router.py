@@ -26,6 +26,7 @@ from torch.utils.data import DataLoader, Dataset
 from transformers import AutoTokenizer
 
 from config import get_tier_names
+from data.schema import CATEGORIES
 from router.features import extract_features
 from router.model import DEFAULT_ENCODER, MultiTierRouter, pick_device
 
@@ -110,6 +111,15 @@ def evaluate(model, loader, device, num_classes: int):
     return correct / max(total, 1), confusion
 
 
+def _load_tokenizer():
+    """Reuse packaged tokenizer files so retraining never needs a hub lookup."""
+    local_path = CKPT_DIR / "tokenizer"
+    if local_path.exists():
+        logger.info("Reusing tokenizer from %s", local_path)
+        return AutoTokenizer.from_pretrained(local_path)
+    return AutoTokenizer.from_pretrained(DEFAULT_ENCODER)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Train the multi-tier router.")
     parser.add_argument("--epochs", type=int, default=6)
@@ -130,7 +140,7 @@ def main() -> None:
     train_recs, val_recs = stratified_split(records, args.val_frac, args.seed)
     logger.info("Train: %d | Val: %d", len(train_recs), len(val_recs))
 
-    tokenizer = AutoTokenizer.from_pretrained(DEFAULT_ENCODER)
+    tokenizer = _load_tokenizer()
     train_ds = RouterDataset(train_recs, tokenizer, label_to_index)
     val_ds = RouterDataset(val_recs, tokenizer, label_to_index)
     train_loader = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True)
@@ -184,6 +194,7 @@ def main() -> None:
             "label_to_index": label_to_index,
             "max_len": MAX_LEN,
             "best_val_acc": best_val_acc,
+            "categories": CATEGORIES,
         }, f, indent=2)
     logger.info("Saved checkpoint + tokenizer + config to %s", CKPT_DIR)
 

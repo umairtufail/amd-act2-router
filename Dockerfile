@@ -14,5 +14,8 @@ COPY baseline/ ./baseline/
 COPY data/__init__.py data/schema.py ./data/
 COPY router/ ./router/
 
-ENV ROUTER_MODE=multitier
+ENV ROUTER_MODE=binary
+ENV BINARY_ROUTER_TAU=0.8
+ENV NER_BINARY_TAU=0.9
+
 CMD ["python", "-m", "agent.agent"]

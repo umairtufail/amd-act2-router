@@ -19,6 +19,7 @@ from pathlib import Path
 import torch
 from transformers import AutoConfig, AutoTokenizer
 
+from data.schema import CATEGORIES
 from router.features import extract_features
 from router.model import MultiTierRouter
 
@@ -33,6 +34,12 @@ def _load():
     inference must run in a slim container with no GPU."""
     with open(CKPT_DIR / "router_config.json", "r", encoding="utf-8") as f:
         config = json.load(f)
+    trained_categories = config.get("categories")
+    if trained_categories is not None and trained_categories != CATEGORIES:
+        raise RuntimeError(
+            "Multitier router category vocabulary differs from its checkpoint; "
+            "run `python -m router.train_multitier_router`."
+        )
     tokenizer = AutoTokenizer.from_pretrained(CKPT_DIR / "tokenizer")
     encoder_config = AutoConfig.from_pretrained(CKPT_DIR / "encoder_config")
     model = MultiTierRouter(num_tiers=len(config["tier_names"]),
