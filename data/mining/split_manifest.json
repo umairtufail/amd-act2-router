@@ -1,0 +1,39 @@
+{
+  "manifest_version": 1,
+  "generator_version": "hard-candidates-v1",
+  "seed": 31,
+  "stress_fraction": 0.3333333333333333,
+  "mining_round": 1,
+  "split_before_model_calls": true,
+  "family_assignments": {
+    "ner_alias_and_acronym": "train",
+    "ner_distractor_titles_and_products": "stress_holdout",
+    "ner_multiple_sentences_coreference": "train",
+    "ner_nested_location_names": "stress_holdout",
+    "ner_surface_type_collision": "train",
+    "ner_unicode_and_punctuation": "train",
+    "summary_conditional_exception": "train",
+    "summary_correction_and_retraction": "stress_holdout",
+    "summary_dependency_sequence": "train",
+    "summary_mixed_metrics": "train",
+    "summary_preliminary_vs_final": "train",
+    "summary_reversal_after_review": "stress_holdout"
+  },
+  "counts": {
+    "train_records": 24,
+    "stress_records": 12,
+    "train_families": 8,
+    "stress_families": 4
+  },
+  "hashes": {
+    "train_dataset_sha256": "30fc1496b9025fba5d04c1e51a3be39d997af98b86641c38d023e3e43cc44b26",
+    "stress_dataset_sha256": "eb17c387072bfc87e11eeee884d6451c0a2e2caf095d824bec83966719f33c98",
+    "train_prompt_groups_sha256": "96258ccc97c32b9c3ee624c1b59d84e2459ffa63b4cd6ca89468599d897c9b4e",
+    "stress_prompt_groups_sha256": "611c6dff3e460e1967d2a18269c2c8370d124cca7d73b6c8961c4ca54d0656f2",
+    "train_families_sha256": "958daffeff81b3ceeb0134bfda22bd1d1f3622df5ed2c457e3e17aa105125609",
+    "stress_families_sha256": "876162197f204bb77afb0776a345b411541784a7fde799f765d689443f35c6d5",
+    "tasks_raw_sha256": "88d9e098fc4a2d359ac19fe9c08b971f28705d69810393f975190a8f0cfdbe47",
+    "holdout_tasks_sha256": "98f92dbf82012f07f1b087c060a6a0865e93fc2ff4e644531dd21eb7418e995b"
+  },
+  "manifest_sha256": "256f093b6c3f54106a077f886a8f6fcfd6c5656d4c41ec1e7275eecf06df0126"
+}

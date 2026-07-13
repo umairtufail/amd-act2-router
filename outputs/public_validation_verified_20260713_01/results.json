@@ -1,0 +1,42 @@
+[
+  {
+    "task_id": "T01",
+    "answer": "Red, Green, Blue are the three primary colors in the RGB model. Displays use RGB because they emit light directly: each pixel combines red, green, and blue light to produce the full spectrum, matching human cone sensitivity. RYB (Red‑Yellow‑Blue) is a subtractive, pigment‑based model suited for mixing paints, not for light emission. Consequently, RGB offers precise additive mixing, higher color gamut for screens, and faster electronic control (each sub‑pixel is driven independently), whereas RYB would require additional conversion steps and cannot reproduce many colors accurately on emissive devices."
+  },
+  {
+    "task_id": "T01b",
+    "answer": "Machine learning (ML) builds models from features engineered by humans; algorithms (e.g., decision trees, SVM) learn patterns from relatively small, structured datasets. Deep learning (DL) is a subset of ML that uses multi‑layer neural networks to automatically learn hierarchical features from large, often unstructured data (images, text, audio).\n\n**How they work**  \n- **ML:** Extract explicit features → feed to a learning algorithm → optimize a loss function using gradient‑based or rule‑based methods.  \n- **DL:** Input raw data → pass through stacked layers of neurons (convolutions, recurrences, transformers) → end‑to‑end training adjusts millions of weights via back‑propagation.\n\n**Differences**  \n- **Data size:** DL needs far more data; ML works with less.  \n- **Feature engineering:** Required in ML, minimal in DL.  \n- **Computation speed:** DL training is slower due to larger models; inference can be comparable or faster with optimized hardware.  \n- **Performance:** DL often outperforms ML on complex, high‑dimensional tasks; ML can be more accurate on small, tabular problems."
+  },
+  {
+    "task_id": "T01c",
+    "answer": "**RAM (Random‑Access Memory)** – volatile memory that loses its data when power is cut. It is read‑write, allowing programs and the operating system to store and modify data quickly while running. RAM is fast (typically nanoseconds) and provides the working space for active processes.\n\n**ROM (Read‑Only Memory)** – non‑volatile memory that retains its contents without power. It is primarily read‑only (or only writable by special firmware updates) and stores permanent code such as the BIOS/UEFI firmware and boot loaders. ROM is slower than RAM (microseconds to milliseconds) but preserves data permanently.\n\n**Contrast**: RAM is mutable, temporary, and faster; ROM is immutable (or rarely changed), permanent, and slower. Both are essential—RAM for runtime speed, ROM for fixed system instructions."
+  },
+  {
+    "task_id": "T02",
+    "answer": "The warehouse has **1,672 units** remaining at the end of Q3."
+  },
+  {
+    "task_id": "T02b",
+    "answer": "- **Sugar needed:** 1 ⅞ cups (≈ 1.875 cups)  \n- **Total cost:** $4.50 (since $2.40 / cup × 1.875 cups = $4.50)"
+  },
+  {
+    "task_id": "T03",
+    "answer": "Neutral — the delivery was two days late and the packaging was damaged (negative), yet the product functioned perfectly and customer support resolved the issue within an hour (positive)."
+  },
+  {
+    "task_id": "T03b",
+    "answer": "Neutral — the tweet notes negative issues (a dented box and a missing manual) alongside positive aspects (a flawless device that was set up in under five minutes)."
+  },
+  {
+    "task_id": "T04",
+    "answer": "Machine learning is being widely adopted in healthcare to analyze medical images, predict patient deterioration, and uncover patterns in electronic health records that can aid diagnosis, treatment planning, and monitoring. Nonetheless, issues such as interpretability, data privacy, liability for errors, algorithmic bias, and lagging regulatory frameworks raise significant concerns for providers and developers."
+  },
+  {
+    "task_id": "T04b",
+    "answer": "- Remote work boosts flexibility, cuts commutes, and improves work‑life balance.  \n- Collaboration, culture, and boundary issues remain challenging.  \n- Firms invest in digital tools and redesign offices for social, creative hubs."
+  },
+  {
+    "task_id": "T05",
+    "answer": "- March 15 2023 — DATE  \n- Sundar Pichai — PERSON  \n- Google — ORGANIZATION  \n- Zurich — LOCATION  \n- ETH Zurich — ORGANIZATION"
+  }
+]

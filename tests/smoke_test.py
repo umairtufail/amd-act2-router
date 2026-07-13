@@ -258,11 +258,17 @@ def test_holdout_regrade_reuses_saved_answers():
     }
     saved_task = {"task_id": "saved_task", "passed": False, "answer": "good"}
     saved = {
+        "dataset_sha256": holdout.dataset_hash([task]),
+        "request_policy_sha256": holdout.request_policy_hash(),
+        "verification_policy_sha256": holdout.verification_policy_hash(),
         "strategies": {
             "binary": {"tasks": [saved_task.copy()]},
             "always_tier0": {"tasks": [saved_task.copy()]},
         }
     }
+    # Production regrade rejects legacy/stale files.  The fixture explicitly
+    # migrates to the current freshness contract before exercising cache reuse.
+    saved["results_sha256"] = holdout.stable_json_hash(saved)
     original_grade = holdout.grade_answer
     holdout.grade_answer = lambda *args: args[-1] == "good"
     try:
@@ -296,6 +302,92 @@ def test_route_returns_model_id():
     assert routing_tokens == 0  # local (or fallback) routing costs nothing
 
 
+def test_verified_tier0_starts_with_the_cheap_arm():
+    import agent.agent as agent_module
+
+    old_mode = agent_module.ROUTER_MODE
+    agent_module.ROUTER_MODE = "verified_tier0"
+    try:
+        tier, model_id, routing_tokens = agent_module.route(
+            "Extract locations from: Paris-based Acme opened in Lyon.", "ner"
+        )
+    finally:
+        agent_module.ROUTER_MODE = old_mode
+    assert tier == "tier0"
+    assert model_id
+    assert routing_tokens == 0
+
+
+def test_public_category_aliases_and_reasoning_controls():
+    import agent.agent as agent_module
+
+    assert agent_module.normalize_category("mathematical_reasoning") == "math_reasoning"
+    assert agent_module.normalize_category("sentiment_classification") == "sentiment"
+    assert agent_module.normalize_category("text_summarization") == "summarization"
+    assert agent_module.normalize_category("named_entity_recognition") == "ner"
+    assert agent_module.answer_reasoning_effort("mathematical_reasoning") == "medium"
+    assert agent_module.answer_reasoning_effort("named_entity_recognition") == "low"
+    factual_prompt = agent_module.answer_system_prompt("factual_knowledge")
+    assert "speed or performance" in factual_prompt
+    assert "faster than the other" in factual_prompt
+    assert "under 140 words" in factual_prompt
+    sentiment_prompt = agent_module.answer_system_prompt("sentiment_classification")
+    assert "every material" in sentiment_prompt
+    assert "timing" in sentiment_prompt
+    assert "classify the sentiment as Neutral" in sentiment_prompt
+    assert agent_module.ANSWER_TEMPERATURE == 0.0
+    assert agent_module.ANSWER_WORKERS >= 1
+    prepared = agent_module.prepare_answer_prompt(
+        "Compare A and B.", "factual_knowledge"
+    )
+    assert "which one is faster or slower" in prepared
+
+
+def test_fireworks_answer_controls_reach_payload():
+    import agent.fireworks_client as fc
+
+    captured = {}
+    original_post = fc.requests.post
+
+    class FakeResponse:
+        status_code = 200
+        headers = {}
+
+        @staticmethod
+        def json():
+            return {
+                "choices": [{"message": {"content": "ok"}}],
+                "usage": {
+                    "total_tokens": 3,
+                    "prompt_tokens": 2,
+                    "completion_tokens": 1,
+                },
+            }
+
+    def fake_post(url, *, json, headers, timeout):
+        captured.update(json)
+        return FakeResponse()
+
+    fc.requests.post = fake_post
+    os.environ.setdefault("FIREWORKS_API_KEY", "fake-key-for-smoke-test")
+    try:
+        result = fc.chat(
+            "accounts/fake/models/x",
+            "task",
+            system_prompt="be concise",
+            reasoning_effort="low",
+        )
+    finally:
+        fc.requests.post = original_post
+
+    assert result["text"] == "ok"
+    assert captured["messages"] == [
+        {"role": "system", "content": "be concise"},
+        {"role": "user", "content": "task"},
+    ]
+    assert captured["reasoning_effort"] == "low"
+
+
 def test_fireworks_client_error_marker():
     """chat_safe must return an error marker, never raise."""
     os.environ.setdefault("FIREWORKS_API_KEY", "fake-key-for-smoke-test")
@@ -327,6 +419,9 @@ def main() -> int:
         test_holdout_covers_all_categories_without_training_overlap,
         test_holdout_regrade_reuses_saved_answers,
         test_route_returns_model_id,
+        test_verified_tier0_starts_with_the_cheap_arm,
+        test_public_category_aliases_and_reasoning_controls,
+        test_fireworks_answer_controls_reach_payload,
         test_fireworks_client_error_marker,
     ]
     failed = 0

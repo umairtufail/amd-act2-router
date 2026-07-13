@@ -1,0 +1,9 @@
+# Local training, evaluation, and test dependencies. These are intentionally
+# absent from the submission image.
+-r requirements.txt
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.13.0
+transformers==5.13.1
+pydantic==2.13.4
+numpy==2.4.6
+pytest==9.1.1

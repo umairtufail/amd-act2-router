@@ -26,6 +26,11 @@ from torch.utils.data import DataLoader, Dataset
 from transformers import AutoTokenizer
 
 from config import get_tier_names
+from data.integrity import (
+    assert_disjoint_prompt_groups,
+    collapse_prompt_groups,
+    dataset_hash,
+)
 from data.schema import CATEGORIES
 from router.features import extract_features
 from router.model import DEFAULT_ENCODER, MultiTierRouter, pick_device
@@ -69,18 +74,40 @@ def load_records() -> list[dict]:
             f"{DATA_PATH} not found — run labeling first: python -m data.label_multitier"
         )
     with open(DATA_PATH, "r", encoding="utf-8") as f:
-        records = [json.loads(line) for line in f if line.strip()]
-    # Tasks where no tier passed can't teach the router a useful tier choice;
-    # map them to the strongest tier (best remaining option at serve time).
-    strongest = get_tier_names()[-1]
-    for r in records:
-        if r["tier_label"] == "none":
-            r["tier_label"] = strongest
+        source = [json.loads(line) for line in f if line.strip()]
+
+    tiers = get_tier_names()
+    rank = {tier: index for index, tier in enumerate(tiers)}
+
+    def resolve(group: list[dict]) -> dict:
+        # Repeated stochastic attempts are one prompt group.  In a conflicting
+        # group retain the most conservative *measured passing arm*; ``none``
+        # is excluded below because a failed arm is not a positive tier label.
+        passing_labels = [
+            row["tier_label"] for row in group if row.get("tier_label") in rank
+        ]
+        return {
+            "tier_label": (
+                max(passing_labels, key=rank.__getitem__)
+                if passing_labels
+                else "none"
+            )
+        }
+
+    collapsed = collapse_prompt_groups(source, resolve)
+    records = [record for record in collapsed if record["tier_label"] != "none"]
+    logger.info(
+        "Collapsed %d rows to %d prompt groups; excluded %d groups where no "
+        "measured arm passed.",
+        len(source),
+        len(collapsed),
+        len(collapsed) - len(records),
+    )
     return records
 
 
 def stratified_split(records: list[dict], val_frac: float, seed: int):
-    """Per-class shuffle & split so rare tiers appear in both sets."""
+    """Per-class group split with no exact-prompt leakage."""
     rng = random.Random(seed)
     by_label: dict[str, list[dict]] = {}
     for r in records:
@@ -92,6 +119,8 @@ def stratified_split(records: list[dict], val_frac: float, seed: int):
         val.extend(group[:n_val])
         train.extend(group[n_val:])
     rng.shuffle(train)
+    rng.shuffle(val)
+    assert_disjoint_prompt_groups(train, val)
     return train, val
 
 
@@ -195,6 +224,8 @@ def main() -> None:
             "max_len": MAX_LEN,
             "best_val_acc": best_val_acc,
             "categories": CATEGORIES,
+            "unique_prompt_groups": len(records),
+            "training_dataset_sha256": dataset_hash(records),
         }, f, indent=2)
     logger.info("Saved checkpoint + tokenizer + config to %s", CKPT_DIR)
 

@@ -27,6 +27,7 @@ from dotenv import load_dotenv
 load_dotenv(REPO_ROOT / ".env")
 
 from agent.fireworks_client import chat_safe
+from agent.request_policy import build_answer_request
 from config import get_model_id_for_tier
 from data.schema import CATEGORIES
 from demo.logic import BinaryDecision, decide_binary
@@ -158,7 +159,7 @@ def render_app() -> None:
             routed_model = get_model_id_for_tier(decision.tier)
             with st.spinner(f"Generating via {decision.tier}..."):
                 routed = chat_safe(
-                    routed_model, prompt, max_tokens=700, temperature=0.2
+                    routed_model, **build_answer_request(prompt, category)
                 )
 
             if routed.get("error"):
@@ -178,9 +179,7 @@ def render_app() -> None:
                     with st.spinner("Generating always-tier3 comparison..."):
                         strongest_answer = chat_safe(
                             get_model_id_for_tier("tier3"),
-                            prompt,
-                            max_tokens=700,
-                            temperature=0.2,
+                            **build_answer_request(prompt, category),
                         )
                 strongest_tokens = int(
                     strongest_answer.get("total_tokens", 0) or 0

@@ -22,7 +22,10 @@ from pathlib import Path
 
 from agent import local_llm_client
 from agent.llm_backend import answer_chat
+from agent.quality_gate import assess_answer, verification_policy_hash
+from agent.request_policy import build_answer_request, request_policy_hash
 from config import get_model_id_for_tier
+from data.integrity import dataset_hash, stable_json_hash
 from data.judge import grade_answer
 from data.schema import CATEGORIES
 from router.infer_binary_router import (
@@ -39,9 +42,13 @@ logger = logging.getLogger(__name__)
 
 HOLDOUT_PATH = Path(__file__).parent.parent / "data" / "holdout_tasks.json"
 RESULTS_PATH = Path(__file__).parent / "holdout_results.json"
-STRATEGIES = ("binary", "multitier", "always_tier0", "always_tier3")
-ANSWER_MAX_TOKENS = 700
-
+STRATEGIES = (
+    "verified_tier0",
+    "binary",
+    "multitier",
+    "always_tier0",
+    "always_tier3",
+)
 AnswerCache = dict[tuple[str, str, str], dict]
 GradeCache = dict[tuple[str, str, str, str], bool]
 
@@ -151,7 +158,7 @@ def choose_tier(strategy: str, task: dict) -> str:
         return choose_binary_tier(prompt, category)
     if strategy == "multitier":
         return predict_multitier_tier(prompt, category)
-    if strategy == "always_tier0":
+    if strategy in {"verified_tier0", "always_tier0"}:
         return "tier0"
     if strategy == "always_tier3":
         return "tier3"
@@ -165,17 +172,14 @@ def cached_answer(
     backend_model: str,
     routed_model_id: str,
     prompt: str,
+    category: str | None,
 ) -> tuple[dict, bool]:
-    """Generate once for each actual backend/model/prompt combination."""
-    key = (backend, backend_model, prompt)
+    """Generate once for each backend/model/exact shared request combination."""
+    request = build_answer_request(prompt, category)
+    key = (backend, backend_model, stable_json_hash(request))
     if key in cache:
         return cache[key], True
-    result = answer_chat(
-        routed_model_id,
-        prompt,
-        max_tokens=ANSWER_MAX_TOKENS,
-        temperature=0.2,
-    )
+    result = answer_chat(routed_model_id, **request)
     cache[key] = result
     return result, False
 
@@ -208,6 +212,40 @@ def cached_grade(
 
 def regrade_failed_results(saved_results: dict, tasks: list[dict]) -> dict:
     """Regrade saved failures in place without generating any new answers."""
+    expected_dataset_hash = dataset_hash(tasks)
+    saved_dataset_hash = saved_results.get("dataset_sha256")
+    if saved_dataset_hash != expected_dataset_hash:
+        raise SystemExit(
+            "Cannot regrade stale holdout results: dataset hash differs "
+            f"(saved={saved_dataset_hash or 'missing'}, "
+            f"current={expected_dataset_hash}). Run a fresh evaluation."
+        )
+    expected_policy_hash = request_policy_hash()
+    saved_policy_hash = saved_results.get("request_policy_sha256")
+    if saved_policy_hash != expected_policy_hash:
+        raise SystemExit(
+            "Cannot regrade stale holdout results: answer request policy hash "
+            f"differs (saved={saved_policy_hash or 'missing'}, "
+            f"current={expected_policy_hash}). Run a fresh evaluation."
+        )
+    expected_verifier_hash = verification_policy_hash()
+    saved_verifier_hash = saved_results.get("verification_policy_sha256")
+    if saved_verifier_hash != expected_verifier_hash:
+        raise SystemExit(
+            "Cannot regrade stale holdout results: verification policy hash "
+            f"differs (saved={saved_verifier_hash or 'missing'}, "
+            f"current={expected_verifier_hash}). Run a fresh evaluation."
+        )
+    saved_results_hash = saved_results.pop("results_sha256", None)
+    actual_results_hash = stable_json_hash(saved_results)
+    if saved_results_hash != actual_results_hash:
+        if saved_results_hash is not None:
+            saved_results["results_sha256"] = saved_results_hash
+        raise SystemExit(
+            "Cannot regrade holdout results: results hash is missing or does "
+            "not match the file contents. Run a fresh evaluation."
+        )
+
     tasks_by_id = {task.get("id"): task for task in tasks}
     strategies = saved_results.get("strategies")
     if not isinstance(strategies, dict):
@@ -281,6 +319,7 @@ def regrade_failed_results(saved_results: dict, tasks: list[dict]) -> dict:
         "changed_to_pass": changed_to_pass,
         "answer_calls": 0,
     }
+    saved_results["results_sha256"] = stable_json_hash(saved_results)
     return saved_results
 
 
@@ -315,13 +354,15 @@ def evaluate_strategy(
     prompt_tokens = 0
     completion_tokens = 0
     tier_usage: Counter[str] = Counter()
+    model_attempts: Counter[str] = Counter()
     category_correct: Counter[str] = Counter()
     category_total: Counter[str] = Counter()
     task_results: list[dict] = []
 
     for index, task in enumerate(tasks):
         task_id = task.get("id", f"task_{index}")
-        tier = choose_tier(strategy, task)
+        initial_tier = choose_tier(strategy, task)
+        tier = initial_tier
         routed_model_id = get_model_id_for_tier(tier)
         backend_model = routed_model_id if answer_backend == "fireworks" else local_model
         answer, answer_cache_hit = cached_answer(
@@ -330,13 +371,76 @@ def evaluate_strategy(
             backend_model=backend_model,
             routed_model_id=routed_model_id,
             prompt=task["prompt"],
+            category=task.get("category"),
         )
+        attempts = [
+            {
+                "tier": tier,
+                "model_id": routed_model_id,
+                "backend_model": backend_model,
+                "answer": answer,
+                "cache_hit": answer_cache_hit,
+            }
+        ]
+        fallback_used = False
+        quality_gate_reason = None
+        if strategy == "verified_tier0":
+            assessment = assess_answer(
+                task["prompt"],
+                task.get("category"),
+                answer.get("text"),
+                answer.get("finish_reason"),
+            )
+            answer = {**answer, "text": assessment.text}
+            attempts[0]["answer"] = answer
+            quality_gate_reason = assessment.reason
+            if not assessment.usable:
+                fallback_used = True
+                tier = "tier3"
+                routed_model_id = get_model_id_for_tier(tier)
+                backend_model = (
+                    routed_model_id if answer_backend == "fireworks" else local_model
+                )
+                answer, fallback_cache_hit = cached_answer(
+                    answer_cache,
+                    backend=answer_backend,
+                    backend_model=backend_model,
+                    routed_model_id=routed_model_id,
+                    prompt=task["prompt"],
+                    category=task.get("category"),
+                )
+                fallback_assessment = assess_answer(
+                    task["prompt"],
+                    task.get("category"),
+                    answer.get("text"),
+                    answer.get("finish_reason"),
+                )
+                answer = {**answer, "text": fallback_assessment.text}
+                attempts.append(
+                    {
+                        "tier": tier,
+                        "model_id": routed_model_id,
+                        "backend_model": backend_model,
+                        "answer": answer,
+                        "cache_hit": fallback_cache_hit,
+                    }
+                )
+
         answer_text = answer.get("text", "")
         passed, grade_cache_hit = cached_grade(grade_cache, task, answer_text)
 
-        answer_total = int(answer.get("total_tokens", 0) or 0)
-        answer_prompt = int(answer.get("prompt_tokens", 0) or 0)
-        answer_completion = int(answer.get("completion_tokens", 0) or 0)
+        answer_total = sum(
+            int(attempt["answer"].get("total_tokens", 0) or 0)
+            for attempt in attempts
+        )
+        answer_prompt = sum(
+            int(attempt["answer"].get("prompt_tokens", 0) or 0)
+            for attempt in attempts
+        )
+        answer_completion = sum(
+            int(attempt["answer"].get("completion_tokens", 0) or 0)
+            for attempt in attempts
+        )
         correct += int(passed)
         category = task.get("category", "")
         category_correct[category] += int(passed)
@@ -345,8 +449,9 @@ def evaluate_strategy(
         prompt_tokens += answer_prompt
         completion_tokens += answer_completion
         tier_usage[tier] += 1
+        model_attempts.update(attempt["tier"] for attempt in attempts)
 
-        cache_note = " cached-answer" if answer_cache_hit else ""
+        cache_note = " cached-answer" if all(a["cache_hit"] for a in attempts) else ""
         logger.info(
             "[%s] strategy=%s task=%s tier=%s tokens=%d%s",
             "PASS" if passed else "FAIL",
@@ -361,6 +466,7 @@ def evaluate_strategy(
             {
                 "task_id": task_id,
                 "category": task.get("category"),
+                "initial_tier": initial_tier,
                 "tier": tier,
                 "routed_model_id": routed_model_id,
                 "answer_backend": answer_backend,
@@ -369,8 +475,11 @@ def evaluate_strategy(
                 "total_tokens": answer_total,
                 "prompt_tokens": answer_prompt,
                 "completion_tokens": answer_completion,
-                "answer_cache_hit": answer_cache_hit,
+                "answer_cache_hit": all(a["cache_hit"] for a in attempts),
                 "grade_cache_hit": grade_cache_hit,
+                "fallback_used": fallback_used,
+                "quality_gate_reason": quality_gate_reason,
+                "attempted_tiers": [attempt["tier"] for attempt in attempts],
                 "answer": answer_text,
             }
         )
@@ -385,6 +494,7 @@ def evaluate_strategy(
         "completion_tokens": completion_tokens,
         "tokens_per_example": total_tokens / max(total, 1),
         "tier_usage": dict(tier_usage),
+        "model_attempts": dict(model_attempts),
         "per_category": {
             category: {
                 "accuracy": category_correct[category] / total_for_category,
@@ -471,8 +581,12 @@ def main() -> None:
         "task_count": len(tasks),
         "answer_calls": len(answer_cache),
         "grade_calls": len(grade_cache),
+        "dataset_sha256": dataset_hash(tasks),
+        "request_policy_sha256": request_policy_hash(),
+        "verification_policy_sha256": verification_policy_hash(),
         "strategies": strategy_results,
     }
+    results["results_sha256"] = stable_json_hash(results)
     RESULTS_PATH.write_text(json.dumps(results, indent=2), encoding="utf-8")
     logger.info("Holdout results -> %s", RESULTS_PATH)
 

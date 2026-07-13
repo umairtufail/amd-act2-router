@@ -58,7 +58,14 @@ def judge_chat(prompt: str, max_tokens: int = 700, temperature: float = 0.0) -> 
     )
 
 
-def answer_chat(model_id: str, prompt: str, max_tokens: int = 700, temperature: float = 0.2) -> dict:
+def answer_chat(
+    model_id: str,
+    prompt: str,
+    max_tokens: int = 700,
+    temperature: float = 0.2,
+    system_prompt: str | None = None,
+    reasoning_effort: str | None = None,
+) -> dict:
     """Answer generation — Fireworks by default; local only with DEV_LOCAL_ANSWERS=1."""
     if os.environ.get("DEV_LOCAL_ANSWERS", "").strip() == "1":
         if not local_llm_client.is_configured():
@@ -66,8 +73,22 @@ def answer_chat(model_id: str, prompt: str, max_tokens: int = 700, temperature: 
         logger.warning(
             "DEV_LOCAL_ANSWERS=1: routing answers to LOCAL LLM (not valid for submission)."
         )
-        return local_llm_client.chat(prompt, max_tokens=max_tokens, temperature=temperature)
-    return fireworks_client.chat(model_id, prompt, max_tokens=max_tokens, temperature=temperature)
+        local_prompt = f"{system_prompt}\n\n{prompt}" if system_prompt else prompt
+        result = local_llm_client.chat(
+            local_prompt, max_tokens=max_tokens, temperature=temperature
+        )
+        result.setdefault("finish_reason", None)
+        result.setdefault("model_id", os.environ.get("LOCAL_LLM_MODEL", "local"))
+        result.setdefault("attempts", 1)
+        return result
+    return fireworks_client.chat(
+        model_id,
+        prompt,
+        max_tokens=max_tokens,
+        temperature=temperature,
+        system_prompt=system_prompt,
+        reasoning_effort=reasoning_effort,
+    )
 
 
 def answer_chat_safe(model_id: str, prompt: str, **kwargs) -> dict:
@@ -80,5 +101,8 @@ def answer_chat_safe(model_id: str, prompt: str, **kwargs) -> dict:
             "total_tokens": 0,
             "prompt_tokens": 0,
             "completion_tokens": 0,
+            "finish_reason": "error",
+            "model_id": model_id,
+            "attempts": fireworks_client.MAX_RETRIES,
             "error": str(exc),
         }

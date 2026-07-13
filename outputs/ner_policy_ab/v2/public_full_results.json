@@ -1,0 +1,42 @@
+[
+  {
+    "task_id": "T01",
+    "answer": "Red, Green, Blue are the three primary colors in the RGB model. Displays use RGB because they emit light; combining red, green, and blue light at varying intensities creates the full visible spectrum through additive mixing. RYB (Red‑Yellow‑Blue) is a subtractive, pigment‑based model suited for paints, where mixing absorbs wavelengths rather than adds them. Consequently, RGB matches the physics of electronic pixels, offers precise color control, and aligns with human vision’s cone response, while RYB cannot accurately reproduce the range of colors a light‑emitting screen needs."
+  },
+  {
+    "task_id": "T01b",
+    "answer": "Machine learning (ML) is a broad field where algorithms learn patterns from data by optimizing a defined objective (e.g., linear regression, decision trees). It typically uses handcrafted features and shallow models, making training relatively fast and requiring less compute.\n\nDeep learning (DL) is a sub‑area of ML that employs multi‑layer neural networks (deep nets) to automatically learn hierarchical features from raw data (e.g., images, text). It needs large datasets and heavy GPU/TPU compute, so training is slower but can achieve higher accuracy on complex tasks.\n\n**Comparison**  \n- **Definition:** ML = general algorithms; DL = deep neural nets.  \n- **Relationship:** DL ⊂ ML.  \n- **Mechanism:** ML uses explicit features + simple models; DL learns features end‑to‑end via back‑propagation.  \n- **Typical use:** ML for tabular, small‑data problems; DL for vision, speech, language.  \n- **Persistence:** Both produce models that can be saved and reused.  \n- **Speed/Performance:** DL training is slower; inference can be comparable or faster than complex ML models, but overall DL is computationally heavier."
+  },
+  {
+    "task_id": "T01c",
+    "answer": "**RAM (Random‑Access Memory)** – volatile memory that stores data the CPU needs instantly while programs run. It can be read **and** written at high speed; typical access times are nanoseconds, making it the fastest main memory. When power is lost, its contents disappear. Used for active operating‑system files, applications, and temporary data.\n\n**ROM (Read‑Only Memory)** – non‑volatile memory that retains data without power. It is primarily **read‑only** (writes are rare, slow, and often require special processes). Access speed is slower than RAM, though still fast enough for boot‑up code. Used to store firmware, BIOS/UEFI, and other permanent system instructions that must persist across power cycles."
+  },
+  {
+    "task_id": "T02",
+    "answer": "The warehouse has **1,672 units** remaining at the end of Q3."
+  },
+  {
+    "task_id": "T02b",
+    "answer": "- Sugar needed for 30 cookies: **1 ⅞ cups** (which is 1.875 cups).  \n- Cost of that sugar at $2.40 per cup: **$4.50**."
+  },
+  {
+    "task_id": "T03",
+    "answer": "Neutral – the delivery was two days late and the packaging was damaged, but the product functioned perfectly and customer support resolved the issue within an hour."
+  },
+  {
+    "task_id": "T03b",
+    "answer": "Neutral — the tweet notes negative issues (a dented box and a missing manual) alongside positive aspects (the device is flawless and was set up in under five minutes)."
+  },
+  {
+    "task_id": "T04",
+    "answer": "Machine learning is being widely adopted in healthcare to analyze medical images, forecast patient deterioration, and uncover hidden patterns in electronic health records, enhancing diagnosis, treatment planning, and monitoring. Nonetheless, issues such as interpretability, data privacy, liability for errors, algorithmic bias, and lagging regulatory frameworks raise significant concerns for clinicians and developers."
+  },
+  {
+    "task_id": "T04b",
+    "answer": "- Remote work boosts flexibility, cuts commutes, and improves work‑life balance.  \n- Collaboration, culture, and boundary blurring remain key challenges.  \n- Firms invest in digital tools and redesign offices for social, creative hubs."
+  },
+  {
+    "task_id": "T05",
+    "answer": "Sundar Pichai, PERSON\nGoogle, ORGANIZATION\nZurich, LOCATION\nETH Zurich, ORGANIZATION\nMarch 15 2023, DATE"
+  }
+]

@@ -1,0 +1,40 @@
+{
+  "manifest_version": 1,
+  "selection_rule": "current-policy valid tier0 passed == false (screen only)",
+  "request_policy_sha256": "e78563784f3eff4ab0cb9aa8b1924897673ec0619e8c106cd23caf4935836838",
+  "split_preserved": true,
+  "requires_confirmed_higher_arm_recovery": false,
+  "train": {
+    "dataset_split": "train",
+    "request_policy_sha256": "e78563784f3eff4ab0cb9aa8b1924897673ec0619e8c106cd23caf4935836838",
+    "counts": {
+      "total": 24,
+      "current_valid": 12,
+      "passed": 10,
+      "hard_failures": 2,
+      "missing_tier0": 0,
+      "stale_policy": 12,
+      "invalid_observation": 0
+    },
+    "input_dataset_sha256": "ccbe8f37df89141c1f2367e4ef22ded26b07fe52072b5883484b8939514f9f2e",
+    "selected_dataset_sha256": "f4eab3102f21ca477379e50fbd38226c940af6550e9dc9d4550915ce80857139",
+    "complete_current_tier0_coverage": false
+  },
+  "stress_holdout": {
+    "dataset_split": "stress_holdout",
+    "request_policy_sha256": "e78563784f3eff4ab0cb9aa8b1924897673ec0619e8c106cd23caf4935836838",
+    "counts": {
+      "total": 12,
+      "current_valid": 6,
+      "passed": 6,
+      "hard_failures": 0,
+      "missing_tier0": 0,
+      "stale_policy": 6,
+      "invalid_observation": 0
+    },
+    "input_dataset_sha256": "1f3981a2e7dc93d101c83b048e6e7c5f7f4321d149fa4d39af0ba4bfd1aa5e8e",
+    "selected_dataset_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "complete_current_tier0_coverage": false
+  },
+  "manifest_sha256": "6c712dbf00c35aa03b768994c3f283c55fa8c2df0069418926fead4f04912ac3"
+}
